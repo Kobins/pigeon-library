@@ -12,5 +12,5 @@
 
 <h2>참고</h2>
 
-- 코틀린 라이브러리가 필요합니다. 플러그인 중 코틀린이 없으면 [kotlin-plugin](https://github.com/Kobins/kotlin-plugin) 을 사용하세요.
+- 플러그인 실행 시 코틀린 라이브러리가 필요합니다. 플러그인 중 코틀린이 shaded된 플러그인이 없으면 [kotlin-plugin](https://github.com/Kobins/kotlin-plugin) 을 사용하세요.
 - SpecialSource를 사용했습니다.
