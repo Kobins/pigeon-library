@@ -1,0 +1,8 @@
+name: pigeon-library
+main: kr.lostwar.PigeonLibraryPlugin
+version: 1.0
+api-version: 1.17
+author: Kobins
+depend:
+  - kotlin-plugin
+  - ProtocolLib
