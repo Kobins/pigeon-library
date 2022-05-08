@@ -48,6 +48,8 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
     fun addObserver(player: Player) {
         val spawned = ClientboundAddEntityPacket(nmsArmorStand)
         player.sendPacket(spawned)
+        updateEntity(player)
+        updateEntityHead(player)
         observers.add(player)
     }
 
@@ -166,6 +168,26 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
                 for(player in observers) {
                     updateEntityHead(player)
                 }
+            }
+        }
+
+    var isVisible: Boolean = true
+        set(value) {
+            val update = field != value
+            field = value
+            nmsArmorStand.isInvisible = !value
+            if(update) {
+                for(player in observers) updateEntity(player)
+            }
+        }
+
+    var isMarker: Boolean = false
+        set(value) {
+            val update = field != value
+            field = value
+            nmsArmorStand.isMarker = value
+            if(update) {
+                for(player in observers) updateEntity(player)
             }
         }
 }
