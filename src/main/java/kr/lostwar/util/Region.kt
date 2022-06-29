@@ -1,5 +1,6 @@
 package kr.lostwar.util
 
+import kr.lostwar.util.math.VectorUtil.toVectorString
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.configuration.ConfigurationSection

@@ -1,10 +1,42 @@
-package kr.lostwar.util
+package kr.lostwar.util.nms
 
-import kr.lostwar.util.ComponentUtil.toJSONString
+import kr.lostwar.util.ui.ComponentUtil.toJSONString
 import net.kyori.adventure.text.Component
+import net.minecraft.core.BlockPos
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import org.bukkit.World
+import org.bukkit.block.Block
+import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftChatMessage
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 object NMSUtil {
+
+    val Player.nmsPlayer: ServerPlayer; get() = (this as CraftPlayer).handle
+    val Entity.nmsEntity; get() = (this as? CraftEntity)?.handle
+    val World.nmsWorld: ServerLevel; get() = (this as CraftWorld).handle
+    fun ItemStack.asNMSCopy(): net.minecraft.world.item.ItemStack = CraftItemStack.asNMSCopy(this)
+    fun String?.toNMSComponent(): net.minecraft.network.chat.Component = CraftChatMessage.fromStringOrNull(this)
+    fun Player.getExpToDrop(block: Block): Int {
+        val pos = BlockPos(block.x, block.y, block.z)
+        val level = world.nmsWorld
+        val nmsData = level.getBlockState(pos)
+        val nmsBlock = nmsData.block ?: return 0
+
+        val item = inventory.itemInMainHand
+
+        if (block.isPreferredTool(item)) {
+            return nmsBlock.getExpDrop(nmsData, level, pos, item.asNMSCopy())
+        }
+        return 0
+
+    }
     fun Component.toNMS(): net.minecraft.network.chat.Component {
         return net.minecraft.network.chat.Component.Serializer.fromJson(toJSONString())!!
     }

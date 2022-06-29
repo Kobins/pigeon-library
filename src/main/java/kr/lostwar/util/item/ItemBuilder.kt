@@ -1,11 +1,11 @@
-package kr.lostwar.util
+package kr.lostwar.util.item
 
+import kr.lostwar.util.item.ItemUtil.applyItemMeta
+import kr.lostwar.util.item.ItemUtil.applyMeta
 import net.kyori.adventure.text.Component
-import kotlin.jvm.JvmOverloads
 import org.bukkit.Material
 import org.bukkit.Material.PLAYER_HEAD
 import org.bukkit.Material.PLAYER_WALL_HEAD
-import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute.GENERIC_ATTACK_SPEED
 import org.bukkit.attribute.AttributeModifier
@@ -15,6 +15,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemFlag.*
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
 import java.util.*
 

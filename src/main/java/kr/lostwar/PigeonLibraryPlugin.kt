@@ -1,6 +1,6 @@
 package kr.lostwar
 
-import kr.lostwar.util.text.console
+import kr.lostwar.util.ui.text.console
 import org.bukkit.plugin.java.JavaPlugin
 
 class PigeonLibraryPlugin : JavaPlugin() {

@@ -1,8 +1,13 @@
-package kr.lostwar.util
+package kr.lostwar.util.nms
 
 import com.google.common.collect.Lists
 import com.mojang.datafixers.util.Pair
 import kr.lostwar.PigeonLibraryPlugin
+import kr.lostwar.util.math.VectorUtil.minus
+import kr.lostwar.util.nms.NMSUtil.asNMSCopy
+import kr.lostwar.util.nms.NMSUtil.nmsWorld
+import kr.lostwar.util.nms.NMSUtil.toNMSComponent
+import kr.lostwar.util.nms.PacketUtil.sendPacket
 import net.minecraft.core.Rotations
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.entity.EquipmentSlot
@@ -10,9 +15,6 @@ import net.minecraft.world.entity.decoration.ArmorStand
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material.AIR
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_17_R1.util.CraftChatMessage
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
@@ -24,7 +26,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
     private val observers: MutableList<Player> = Lists.newArrayList()
     val nmsArmorStand: ArmorStand
     init {
-        val worldServer = (location.world as CraftWorld).handle
+        val worldServer = location.world.nmsWorld
         nmsArmorStand = ArmorStand(worldServer, location.x, location.y, location.z).apply {
             if(!headRotateByPose){
                 yRot = location.yaw
@@ -155,7 +157,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
                 changed = true
             }
             field = value
-            nmsArmorStand.customName = CraftChatMessage.fromStringOrNull(value)
+            nmsArmorStand.customName = value.toNMSComponent()
             nmsArmorStand.isCustomNameVisible = value != null && value.isNotBlank()
         }
 
@@ -163,7 +165,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
         set(value) {
             val update = field != value
             field = value
-            nmsArmorStand.setItemSlot(EquipmentSlot.HEAD, CraftItemStack.asNMSCopy(value))
+            nmsArmorStand.setItemSlot(EquipmentSlot.HEAD, value.asNMSCopy())
             if(update) {
                 for(player in observers) {
                     updateEntityHead(player)

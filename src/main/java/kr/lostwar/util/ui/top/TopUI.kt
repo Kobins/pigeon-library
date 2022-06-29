@@ -1,12 +1,10 @@
-package kr.lostwar.util.ui
+package kr.lostwar.util.ui.top
 
 import com.comphenix.protocol.PacketType.Play
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
 import kr.lostwar.PigeonLibraryPlugin
-import kr.lostwar.util.NMSUtil.toNMS
-import kr.lostwar.util.sendPacket
-import kr.lostwar.util.ui.TopUI.Companion.toNMS
+import kr.lostwar.util.nms.PacketUtil.sendPacket
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
@@ -20,12 +18,7 @@ import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
-import kotlin.collections.HashSet
 
-enum class TopUIType{
-    LEGACY,
-    ADVENTURE;
-}
 
 class TopUI(
     name: Component,
@@ -33,6 +26,11 @@ class TopUI(
     overlay: BossBar.Overlay,
     vararg flags: BossBar.Flag
 ) : org.bukkit.boss.BossBar {
+    enum class TopUIType{
+        LEGACY,
+        ADVENTURE;
+    }
+
     val uniqueId = Mth.createInsecureUUID()
     var name: Component = name
         set(value) {
@@ -305,23 +303,3 @@ class TopUI(
 
 }
 
-class TopUIBossEvent(topUI: TopUI)
-    : BossEvent(topUI.uniqueId, topUI.name.toNMS(), topUI.color.toNMS(), topUI.overlay.toNMS())
-{
-    init {
-        this.progress = topUI.progress.toFloat()
-        darkenScreen = BossBar.Flag.DARKEN_SCREEN in topUI.flags
-        playBossMusic = BossBar.Flag.PLAY_BOSS_MUSIC in topUI.flags
-        createWorldFog = BossBar.Flag.CREATE_WORLD_FOG in topUI.flags
-    }
-
-    fun update(topUI: TopUI) {
-        setName(topUI.name.toNMS())
-        setColor(topUI.color.toNMS())
-        setOverlay(topUI.overlay.toNMS())
-        setProgress(topUI.progress.toFloat())
-        darkenScreen = BossBar.Flag.DARKEN_SCREEN in topUI.flags
-        playBossMusic = BossBar.Flag.PLAY_BOSS_MUSIC in topUI.flags
-        createWorldFog = BossBar.Flag.CREATE_WORLD_FOG in topUI.flags
-    }
-}

@@ -1,8 +1,6 @@
-package kr.lostwar.util.text
+package kr.lostwar.util.ui.text.bar
 
-import kr.lostwar.util.clamp
-import kotlin.math.max
-import kotlin.math.min
+import kr.lostwar.util.math.clamp
 
 abstract class CachedBar<T>(protected val amount: Int) {
     protected abstract fun getBar(index: Int): T

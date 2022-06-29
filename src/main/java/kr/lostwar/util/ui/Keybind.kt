@@ -1,7 +1,8 @@
-package kr.lostwar.util
+package kr.lostwar.util.ui
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.*
+import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 
@@ -45,14 +46,14 @@ enum class Keybind(val key: String){
 
     companion object{
         fun List<Keybind>.join(
-            delimeter: Component = text(" + "),
+            seperator: Component = text(" + "),
             prefix: Component = empty(),
             suffix: Component = empty(),
             color: TextColor = NamedTextColor.GOLD,
         ) = text()
             .append(prefix.color(color))
             .append(if(prefix == empty()) empty() else space())
-            .append(join(delimeter.color(color), map { it.asComponent.color(NamedTextColor.WHITE) }))
+            .append(join(JoinConfiguration.separator { seperator.color(color) }, map { it.asComponent.color(NamedTextColor.WHITE) }))
             .append(if(suffix == empty()) empty() else space())
             .append(suffix.color(color))
     }

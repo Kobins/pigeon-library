@@ -1,4 +1,4 @@
-package kr.lostwar.util
+package kr.lostwar.util.ui
 
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.*
@@ -13,27 +13,6 @@ import net.kyori.adventure.title.Title.Times
 import net.kyori.adventure.util.Ticks
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Player
-
-operator fun Component.plus(other: ComponentLike) = append(other)
-
-fun Player.showTitle(
-    title: Component,
-    subtitle: Component,
-    fadeIn: Int,
-    stay: Int,
-    fadeOut: Int
-) = showTitle(ComponentUtil.title(title, subtitle, fadeIn.toLong(), stay.toLong(), fadeOut.toLong()))
-
-fun Player.showTitle(
-    title: ComponentLike,
-    subtitle: ComponentLike,
-    fadeIn: Int,
-    stay: Int,
-    fadeOut: Int
-) = showTitle(ComponentUtil.title(title.asComponent(), subtitle.asComponent(), fadeIn.toLong(), stay.toLong(), fadeOut.toLong()))
-
-
-fun Player.sendMessages(vararg components: ComponentLike) = components.forEach { sendMessage(it) }
 object ComponentUtil {
 
 
@@ -245,11 +224,33 @@ object ComponentUtil {
         fadeIn: Long,
         stay: Long,
         fadeOut: Long
-    ) = Title.title(title, subtitle, Times.of(
+    ) = Title.title(title, subtitle, Times.times(
         Ticks.duration(fadeIn),
         Ticks.duration(stay),
         Ticks.duration(fadeOut),
     ))
 
+
+
+    operator fun Component.plus(other: ComponentLike) = append(other)
+
+    fun Player.showTitle(
+        title: Component,
+        subtitle: Component,
+        fadeIn: Int,
+        stay: Int,
+        fadeOut: Int
+    ) = showTitle(title(title, subtitle, fadeIn.toLong(), stay.toLong(), fadeOut.toLong()))
+
+    fun Player.showTitle(
+        title: ComponentLike,
+        subtitle: ComponentLike,
+        fadeIn: Int,
+        stay: Int,
+        fadeOut: Int
+    ) = showTitle(title(title.asComponent(), subtitle.asComponent(), fadeIn.toLong(), stay.toLong(), fadeOut.toLong()))
+
+
+    fun Player.sendMessages(vararg components: ComponentLike) = components.forEach { sendMessage(it) }
 }
 

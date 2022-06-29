@@ -1,38 +1,26 @@
-package kr.lostwar.util
+package kr.lostwar.util.scoreboard
 
-import kr.lostwar.util.ComponentUtil.bold
-import kr.lostwar.util.text.console
-import kr.lostwar.util.text.consoleRaw
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.empty
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.format.NamedTextColor
-import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.DisplaySlot
-import org.bukkit.scoreboard.Score
-import org.bukkit.scoreboard.Team
 import java.util.*
-import kotlin.collections.HashMap
-
-interface ScoreboardController<T>{
-    fun setContent(content: List<T>)
-    fun clearContent() = setContent(emptyList())
-}
-
-private val playerScoreboardMap = HashMap<UUID, PlayerScoreboardController>()
-val Player.scoreboardController: PlayerScoreboardController
-    get() = playerScoreboardMap.computeIfAbsent(uniqueId) { PlayerScoreboardController(this) }
-        .takeIf { it.player == player }
-        ?: PlayerScoreboardController(this).also { playerScoreboardMap[uniqueId] = it }
 
 class PlayerScoreboardController(
     val player: Player,
 ) : ScoreboardController<Component> {
+    companion object {
+        private val playerScoreboardMap = HashMap<UUID, PlayerScoreboardController>()
+        @JvmStatic
+        val Player.scoreboardController: PlayerScoreboardController
+            get() = playerScoreboardMap.computeIfAbsent(uniqueId) { PlayerScoreboardController(this) }
+                .takeIf { it.player == player }
+                ?: PlayerScoreboardController(this).also { playerScoreboardMap[uniqueId] = it }
+    }
+
     val scoreboard by lazy { Bukkit.getScoreboardManager().newScoreboard }
     val objective by lazy {
-        scoreboard.registerNewObjective(" ", "dummy", empty()).apply {
+        scoreboard.registerNewObjective(" ", "dummy", Component.empty()).apply {
             displaySlot = DisplaySlot.SIDEBAR
         }
     }
@@ -84,15 +72,4 @@ class PlayerScoreboardController(
 
         lastContent = content
     }
-}
-
-object GlobalScoreboardController : ScoreboardController<Component> {
-    override fun setContent(content: List<Component>) {
-        Bukkit.getOnlinePlayers().forEach { it.scoreboardController.setContent(content) }
-    }
-    fun setContentEach(mapNotNull: (Player) -> List<Component>?) = Bukkit.getOnlinePlayers().forEach {
-        val contents = mapNotNull(it) ?: emptyList()
-        it.scoreboardController.setContent(contents)
-    }
-    fun setTitle(title: Component) = Bukkit.getOnlinePlayers().forEach { it.scoreboardController.title = title }
 }

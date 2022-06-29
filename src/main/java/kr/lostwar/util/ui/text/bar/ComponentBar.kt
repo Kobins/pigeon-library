@@ -1,9 +1,8 @@
-package kr.lostwar.util.text
+package kr.lostwar.util.ui.text.bar
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import java.util.*
 

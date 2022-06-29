@@ -1,4 +1,4 @@
-package kr.lostwar.util.text
+package kr.lostwar.util.ui.text.bar
 
 import java.util.*
 

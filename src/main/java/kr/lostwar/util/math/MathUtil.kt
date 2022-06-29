@@ -1,7 +1,6 @@
-package kr.lostwar.util
+package kr.lostwar.util.math
 
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.random.Random
 
 fun lerp(start: Double, end: Double, percentage: Double): Double{
     return start + (end - start) * percentage
@@ -23,3 +22,9 @@ fun <T : Comparable<T>> T.clamp(range: ClosedRange<T>) = maxOf(range.start, minO
 
 fun Double.toRadians() = Math.toRadians(this)
 fun Double.toDegrees() = Math.toDegrees(this)
+
+val IntRange.size: Int
+    get() = endInclusive - start + 1
+fun ClosedFloatingPointRange<Double>.lerp(t: Double) = lerp(start, endInclusive, (t.clamp(0.0..1.0)))
+fun ClosedFloatingPointRange<Double>.center() = lerp(0.5)
+fun ClosedFloatingPointRange<Double>.random() = lerp(Random.nextDouble())
