@@ -23,7 +23,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>1.6.10</kotlin.version>
-        <minecraft.version>1.18.2</minecraft.version>
+        <minecraft.version>1.19</minecraft.version>
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <maven.compiler.useIncrementalCompilation>true</maven.compiler.useIncrementalCompilation>
     </properties>
 
     <dependencies>
@@ -60,7 +62,24 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+<!--        <testSourceDirectory>src/test/kotlin</testSourceDirectory>-->
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <!--                        <phase>verify</phase>-->
+                        <goals>
+                            <!--                            <goal>jar-no-fork</goal>-->
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -112,20 +131,6 @@
                             <remappedDependencies>org.spigotmc:spigot:${minecraft.version}-R0.1-SNAPSHOT:jar:remapped-obf</remappedDependencies>
 
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

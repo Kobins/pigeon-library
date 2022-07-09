@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package kr.lostwar.util.ui.text
 
 import net.md_5.bungee.api.ChatColor
@@ -8,6 +10,7 @@ import java.util.regex.Pattern
 object StringUtil {
 
     private val HEX_PATTERN = Pattern.compile("#[a-fA-F0-9]{6}")
+    @Suppress("DEPRECATION")
     val String.hexColored
         get() = net.md_5.bungee.api.ChatColor.of(this).toString()
     fun String.colored(): String {
@@ -20,6 +23,7 @@ object StringUtil {
                 match = HEX_PATTERN.matcher(msg)
             }
         }
+        @Suppress("DEPRECATION")
         return ChatColor.translateAlternateColorCodes('&', msg)
     }
     fun String.uncolored(): String = ChatColor.stripColor(this)!!
@@ -48,10 +52,10 @@ object StringUtil {
         }
     val String.unifontWidth: Int
         get() {
-            return sumBy { it.unifontWidth }
+            return sumOf { it.unifontWidth }
         }
 
-    fun String.getSize(sizer: (Char) -> Int) = sumBy(sizer)
+    fun String.getSize(sizer: (Char) -> Int) = sumOf(sizer)
 
     fun String.chunkedWith(divider: String = " ", newLiner: String = "\n", limitWidth: Int = 280, sizer: (String) -> Int = { it.unifontWidth }): List<String> {
         val dividerWidth = sizer(divider)

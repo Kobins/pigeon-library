@@ -16,6 +16,7 @@ object ItemUtil {
 
     fun <T : ItemStack> T.applyItemMeta(applier: ItemMeta.() -> Unit) = applyMeta(applier)
     fun <T : ItemStack, M : ItemMeta> T.applyMeta(applier: M.() -> Unit): T {
+        @Suppress("UNCHECKED_CAST")
         val meta = itemMeta as? M ?: kotlin.run {
             ClassCastException("cannot cast ItemMeta").printStackTrace()
             return this

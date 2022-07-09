@@ -15,5 +15,7 @@ fun CommandSender.colorMessage(vararg message: String) = message.forEach{ sendMe
 fun CommandSender.errorMessage(message: String) = sendMessage("&c$message".colored())
 fun CommandSender.errorMessage(vararg message: String) = message.forEach{ errorMessage(it)}
 
+@Suppress("DEPRECATION")
 fun Player.colorActionBar(message: String) = sendActionBar('&', message.colored())
+@Suppress("DEPRECATION")
 fun Player.colorTitle(title: String, subtitle: String, fadeIn: Int, stay: Int, fadeOut: Int) = sendTitle(title.colored(), subtitle.colored(), fadeIn, stay, fadeOut)

@@ -1,5 +1,8 @@
 package kr.lostwar.util.nms
 
+import java.lang.reflect.Field
+import java.util.concurrent.ConcurrentHashMap
+
 object ReflectionUtil {
     @JvmStatic
     fun Any.getPrivateField(fieldName: String): Any?{
@@ -22,5 +25,27 @@ object ReflectionUtil {
             e.printStackTrace()
             null
         }
+    }
+
+    private val fieldMap = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Field>>()
+
+    fun unlockField(clazz: Class<*>, fieldName: String) {
+        try {
+            val field = clazz.getDeclaredField(fieldName)
+            field.isAccessible = true
+            val classFieldMap = fieldMap.computeIfAbsent(clazz) { ConcurrentHashMap() }
+            classFieldMap[fieldName] = field
+            fieldMap[clazz] = classFieldMap
+        }catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun getField(clazz: Class<*>, fieldName: String): Field {
+        if(!fieldMap.containsKey(clazz) || !fieldMap[clazz]!!.containsKey(fieldName)) {
+            unlockField(clazz, fieldName)
+        }
+
+        return fieldMap[clazz]!![fieldName]!!
     }
 }

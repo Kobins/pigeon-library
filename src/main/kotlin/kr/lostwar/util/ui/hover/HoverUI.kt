@@ -19,7 +19,7 @@ class HoverUI private constructor(
     }
 
     fun destroy(){
-        sessionsMap.forEach { (key, session) ->
+        sessionsMap.forEach { (_, session) ->
             session.destroy()
         }
         sessionsMap.clear()

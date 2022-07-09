@@ -70,7 +70,7 @@ class HoverUISession(
                 ?.first
         }
 
-        for((key, entity) in entityMap){
+        for((_, entity) in entityMap){
             val isHovered = currentHoveredEntity == entity
             val distance = player.eyeLocation.distance(entity.targettingLocation)
             val radius = if(isHovered) hoveredRadius else radius
@@ -141,7 +141,7 @@ class HoverUISession(
 
     fun destroyEntities(){
         if(entityMap.isEmpty()) return
-        entityMap.entries.forEach { (key, entity) ->
+        entityMap.entries.forEach { (_, entity) ->
             entity.destroy()
         }
         entityMap.clear()

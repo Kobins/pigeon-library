@@ -1,6 +1,7 @@
 package kr.lostwar.util.item
 
 import org.bukkit.Material
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 
 data class ItemData(
@@ -96,6 +97,10 @@ data class ItemData(
                 return ItemData(type, data)
             }
             return default
+        }
+        fun ConfigurationSection.getItemData(dir: String, default: ItemData?): ItemData? {
+            val raw = getString(dir)
+            return toItemData(raw, default)
         }
     }
 

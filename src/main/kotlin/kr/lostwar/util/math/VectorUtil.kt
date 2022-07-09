@@ -53,14 +53,15 @@ object VectorUtil {
     fun Location.getDisplayString() = String.format("%.3f, %.3f, %.3f", x, y, z)
     fun Vector.getDisplayString() = String.format("%.3f, %.3f, %.3f", x, y, z)
 
-    fun fromVectorString(string: String?, default: Vector): Vector?{
+    fun fromVectorString(string: String?): Vector? {
         if(string == null){
-            return default
+            return null
         }
-        val splitted = string.split(',').map { it.trim() }
-        val x = splitted.getOrNull(0)?.toDoubleOrNull() ?: 0.0
-        val y = splitted.getOrNull(1)?.toDoubleOrNull() ?: 64.0
-        val z = splitted.getOrNull(2)?.toDoubleOrNull() ?: 0.0
+        val split = string.split(',').map { it.trim() }
+        if(split.size < 3) return null
+        val x = split[0].toDoubleOrNull() ?: return null
+        val y = split[1].toDoubleOrNull() ?: return null
+        val z = split[2].toDoubleOrNull() ?: return null
         return Vector(x, y, z)
     }
 
@@ -163,9 +164,9 @@ object VectorUtil {
         return null
     }
 
-    fun Vector.getOffsetVector(forward: Vector): Vector {
+    fun Vector.localToWorld(forward: Vector): Vector {
         val right = forward.getCrossProduct(UP)
         val up = right.getCrossProduct(forward)
-        return (forward * z) + (right * x) + (up * y)
+        return (forward * z).add(right * x).add(up * y)
     }
 }

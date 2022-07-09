@@ -5,15 +5,17 @@ import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.EntityDimensions
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
 object NMSUtil {
@@ -32,7 +34,7 @@ object NMSUtil {
         val item = inventory.itemInMainHand
 
         if (block.isPreferredTool(item)) {
-            return nmsBlock.getExpDrop(nmsData, level, pos, item.asNMSCopy())
+            return nmsBlock.getExpDrop(nmsData, level, pos, item.asNMSCopy(), true)
         }
         return 0
 
@@ -40,6 +42,25 @@ object NMSUtil {
     fun Component.toNMS(): net.minecraft.network.chat.Component {
         return net.minecraft.network.chat.Component.Serializer.fromJson(toJSONString())!!
     }
+
+    private val equipmentSlotBukkitToNMS = mapOf(
+        EquipmentSlot.HAND      to net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+        EquipmentSlot.OFF_HAND  to net.minecraft.world.entity.EquipmentSlot.OFFHAND,
+        EquipmentSlot.HEAD      to net.minecraft.world.entity.EquipmentSlot.HEAD,
+        EquipmentSlot.CHEST     to net.minecraft.world.entity.EquipmentSlot.CHEST,
+        EquipmentSlot.LEGS      to net.minecraft.world.entity.EquipmentSlot.LEGS,
+        EquipmentSlot.FEET      to net.minecraft.world.entity.EquipmentSlot.FEET,
+    )
+    val EquipmentSlot.nmsSlot; get() = equipmentSlotBukkitToNMS[this]!!
+
+    fun Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
+        val nmsEntity = nmsEntity ?: return
+        // 1.19
+        if(eye != null)
+            ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba").setFloat(nmsEntity, eye)
+        ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ").set(nmsEntity, EntityDimensions(width, height, false))
+    }
+
 }
 
 //import com.mojang.datafixers.DataFixUtils

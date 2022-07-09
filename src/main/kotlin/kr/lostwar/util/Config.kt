@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.io.IOException
 
-class Config(private val file: File) : YamlConfiguration() {
+class Config(val file: File) : YamlConfiguration() {
 
     constructor(path: String) : this(File(path))
 

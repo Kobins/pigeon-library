@@ -1,5 +1,8 @@
 package kr.lostwar.util.block
 
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 
 object BlockUtil {
@@ -31,4 +34,15 @@ object BlockUtil {
             BlockFace.EAST -> BlockFace.SOUTH
             else -> null
         }
+
+    fun isEmptySpace(location: Location, block: Block): Boolean {
+        when(block.type) {
+            Material.AIR, Material.CAVE_AIR, Material.VOID_AIR -> return true
+            else -> {}
+        }
+
+        val checkVector = location.toVector()
+        val blockLocation = block.location.toBlockLocation()
+        return block.collisionShape.boundingBoxes.any { it.shift(blockLocation).contains(checkVector) }
+    }
 }

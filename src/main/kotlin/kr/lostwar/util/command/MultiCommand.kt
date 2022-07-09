@@ -16,7 +16,7 @@ abstract class MultiCommand(
     open fun isSuggestible(sender: CommandSender): Boolean = true
 
     open fun usage(sender: CommandSender, label: String, args: Array<String>) {
-        sender.errorMessage("Usage: /$label <${subCommands.joinToString("/") { it.name }}> <...>")
+        sender.errorMessage("Usage: /$label <${subCommands.filter { it.isSuggestible(sender) }.joinToString("/") { it.name }}> <...>")
     }
 
     override fun onExecute(sender: CommandSender, label: String, args: Array<String>) {

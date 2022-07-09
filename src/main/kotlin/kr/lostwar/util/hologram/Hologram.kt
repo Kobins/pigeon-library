@@ -27,6 +27,7 @@ class Hologram(
             isVisible = true
             isInvisible = false
             isCustomNameVisible = true
+            @Suppress("DEPRECATION")
             maxHealth = 100.0
             health = 100.0
             isInvulnerable = true

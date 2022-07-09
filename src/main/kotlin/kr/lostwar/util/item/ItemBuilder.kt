@@ -102,7 +102,7 @@ class ItemBuilder : ItemStack {
         return this
     }
 
-    fun <T, Z> persistent(key: NamespacedKey, type: PersistentDataType<T, Z>, value: Z): ItemBuilder {
+    fun <T, Z : Any> persistent(key: NamespacedKey, type: PersistentDataType<T, Z>, value: Z): ItemBuilder {
         applyItemMeta {
             persistentDataContainer.set(key, type, value)
         }
@@ -123,32 +123,38 @@ class ItemBuilder : ItemStack {
 
     @Deprecated("legacy string", ReplaceWith("displayName"))
     fun displayNameString(displayName: String?) = applyItemMeta {
+        @Suppress("DEPRECATION")
         setDisplayName(displayName)
     }
 
     @Deprecated("legacy string", ReplaceWith("addLore"))
     fun addLoreString(vararg lore: String?): ItemBuilder {
+        @Suppress("DEPRECATION")
         return addLoreString(lore.filterNotNull().toList())
     }
     @Deprecated("legacy string", ReplaceWith("addLore"))
     fun addLoreString(lore: List<String>): ItemBuilder {
+        @Suppress("DEPRECATION")
         var itemLore = getLore()
         if (itemLore == null) {
             itemLore = ArrayList()
         }
         itemLore.addAll(lore)
+        @Suppress("DEPRECATION")
         setLore(itemLore)
         return this
     }
 
     @Deprecated("legacy string", ReplaceWith("lore"))
     fun loreString(vararg lore: String?): ItemBuilder {
+        @Suppress("DEPRECATION")
         setLore(lore.toList())
         return this
     }
 
     @Deprecated("legacy string", ReplaceWith("lore"))
     fun loreString(lore: List<String?>?): ItemBuilder {
+        @Suppress("DEPRECATION")
         setLore(lore)
         return this
     }
