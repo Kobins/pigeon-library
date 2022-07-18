@@ -1,27 +1,43 @@
 package kr.lostwar.util.nms
 
+import kr.lostwar.util.math.VectorUtil
+import kr.lostwar.util.math.VectorUtil.normalized
+import kr.lostwar.util.math.VectorUtil.times
 import kr.lostwar.util.ui.ComponentUtil.toJSONString
 import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.Mth
 import net.minecraft.world.entity.EntityDimensions
+import net.minecraft.world.level.ClipContext
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.Vec3
+import org.bukkit.FluidCollisionMode
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.craftbukkit.v1_19_R1.CraftFluidCollisionMode
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftRayTraceResult
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.RayTraceResult
+import org.bukkit.util.Vector
 
 object NMSUtil {
 
     val Player.nmsPlayer: ServerPlayer; get() = (this as CraftPlayer).handle
     val Entity.nmsEntity; get() = (this as? CraftEntity)?.handle
+    val LivingEntity.nmsLivingEntity; get() = (this as? CraftLivingEntity)?.handle
     val World.nmsWorld: ServerLevel; get() = (this as CraftWorld).handle
     fun ItemStack.asNMSCopy(): net.minecraft.world.item.ItemStack = CraftItemStack.asNMSCopy(this)
     fun String?.toNMSComponent(): net.minecraft.network.chat.Component = CraftChatMessage.fromStringOrNull(this)
@@ -53,12 +69,192 @@ object NMSUtil {
     )
     val EquipmentSlot.nmsSlot; get() = equipmentSlotBukkitToNMS[this]!!
 
-    fun Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
+    // 1.19 obfucscation https://piston-data.mojang.com/v1/objects/1c1cea17d5cd63d68356df2ef31e724dd09f8c26/server.txt
+
+    private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba")
+    private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ")
+
+    fun org.bukkit.entity.Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
         val nmsEntity = nmsEntity ?: return
         // 1.19
         if(eye != null)
-            ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba").setFloat(nmsEntity, eye)
-        ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ").set(nmsEntity, EntityDimensions(width, height, false))
+            entityEyeHeightField.setFloat(nmsEntity, eye)
+        entityDimensionsField.set(nmsEntity, EntityDimensions(width, height, false))
+    }
+
+    private val collideMethod = ReflectionUtil.getMethod(net.minecraft.world.entity.Entity::class.java, "g", Vec3::class.java)
+    fun org.bukkit.entity.Entity.tryCollideAndGetModifiedVelocity(velocity: Vector): Vector {
+        val nmsEntity = nmsEntity ?: return velocity
+        val vec = Vec3(velocity.x, velocity.y, velocity.z)
+        val resultVec = collideMethod.invoke(nmsEntity, vec) as Vec3
+        return Vector(resultVec.x, resultVec.y, resultVec.z)
+    }
+
+    fun org.bukkit.entity.Entity.setPosition(position: Vector) {
+        val nmsEntity = nmsEntity ?: return
+        nmsEntity.setPos(position.x, position.y, position.z)
+    }
+
+
+    fun org.bukkit.entity.Entity.setNoPhysics(noPhysics: Boolean) {
+        val nmsEntity = nmsEntity ?: return
+        nmsEntity.noPhysics = noPhysics
+    }
+
+    fun org.bukkit.entity.Entity.setIsOnGround(onGround: Boolean) {
+        val nmsEntity = nmsEntity ?: return
+        nmsEntity.isOnGround = onGround
+    }
+
+
+    fun org.bukkit.entity.Entity.setMaxUpStep(maxUpStep: Float) {
+        val nmsEntity = nmsEntity ?: return
+        nmsEntity.maxUpStep = maxUpStep
+    }
+
+    fun org.bukkit.entity.Entity.hasVerticalCollision(): Boolean {
+        val nmsEntity = nmsEntity ?: return false
+        return nmsEntity.verticalCollision
+    }
+    fun org.bukkit.entity.Entity.hasVerticalCollisionBelow(): Boolean {
+        val nmsEntity = nmsEntity ?: return false
+        return nmsEntity.verticalCollisionBelow
+    }
+
+    fun org.bukkit.entity.LivingEntity.setDiscardFriction(discardFriction: Boolean) {
+        val nmsEntity = nmsLivingEntity ?: return
+        nmsEntity.setDiscardFriction(discardFriction)
+    }
+
+    fun org.bukkit.entity.LivingEntity.travel(movementInput: Vector = VectorUtil.ZERO) {
+        val nmsEntity = nmsLivingEntity ?: return
+        nmsEntity.travel(Vec3(movementInput.x, movementInput.y, movementInput.z))
+    }
+
+    fun isUnderwater() {
+
+    }
+
+    enum class RayTraceContinuation {
+        STOP,
+        PIERCE,
+    }
+    fun World.rayTraceBlocksPiercing(
+        origin: Vector,
+        direction: Vector,
+        maxDistance: Double,
+        fluidCollisionMode: FluidCollisionMode,
+        ignorePassableBlocks: Boolean = true,
+        onHit: (distance: Double, result: RayTraceResult?) -> RayTraceContinuation,
+    ) {
+//        console("rayTraceBlocksPiercing(${origin}, ${direction}, ${maxDistance}, ${fluidCollisionMode}, ${ignorePassableBlocks})")
+        val nmsWorld = nmsWorld
+        if(maxDistance < 0.0) {
+//            console("- invalid maxDistance, return")
+            return
+        }
+        val normalizedDirection = direction.normalized
+        val dir = normalizedDirection.times(maxDistance)
+        val start = Vec3(origin.x, origin.y, origin.z)
+        val end = Vec3(origin.x + dir.x, origin.y + dir.y, origin.z + dir.z)
+//        console("- start: ${start}, end: ${end}")
+        val context = ClipContext(
+            start, end,
+            if(ignorePassableBlocks) ClipContext.Block.COLLIDER else ClipContext.Block.OUTLINE,
+            CraftFluidCollisionMode.toNMS(fluidCollisionMode),
+            null
+        )
+        traverseBlocks(start, end, context,
+            onMove = { c, blockPos ->
+                val nmsResult = nmsWorld.clip(c, blockPos)
+                if(nmsResult == null){
+//                    console("onMove(${blockPos}): result is null")
+                    return@traverseBlocks null
+                }
+                val result = CraftRayTraceResult.fromNMS(this, nmsResult)
+                val distance = if(result != null) normalizedDirection.dot(result.hitPosition.subtract(origin)) else maxDistance
+//                console("onMove(${blockPos}): $result, distance=${distance}")
+                if(onHit(distance, result) == RayTraceContinuation.STOP) {
+//                    console("! stopped traverse")
+                    // 중단
+                    return@traverseBlocks nmsResult
+                }
+                // 스킵
+                null
+            },
+            onMiss = {
+                val d = it.from.subtract(it.to)
+                BlockHitResult.miss(it.to, Direction.getNearest(d.x, d.y, d.z), BlockPos(it.to))
+            }
+        )
+    }
+    private const val epsilon = -1.0E-7
+    // from BlockGetter.class
+    private fun traverseBlocks(
+        start: Vec3, end: Vec3, context: ClipContext,
+        onMove: (context: ClipContext, blockPos: BlockPos) -> BlockHitResult?,
+        onMiss: (context: ClipContext) -> BlockHitResult
+    ): BlockHitResult {
+//        console("traverseBlocks(${start}, ${end})")
+        if(start == end){
+//            console("- start == end, miss")
+            return onMiss(context)
+        }
+
+        val endX = Mth.lerp(epsilon, end.x, start.x)
+        val endY = Mth.lerp(epsilon, end.y, start.y)
+        val endZ = Mth.lerp(epsilon, end.z, start.z)
+        val startX = Mth.lerp(epsilon, start.x, end.x)
+        val startY = Mth.lerp(epsilon, start.y, end.y)
+        val startZ = Mth.lerp(epsilon, start.z, end.z)
+        var xInt = Mth.floor(startX)
+        var yInt = Mth.floor(startY)
+        var zInt = Mth.floor(startZ)
+//        console("- startInt($xInt, $yInt, $zInt)")
+        val blockPos = BlockPos.MutableBlockPos(xInt, yInt, zInt)
+        val initialResult = onMove(context, blockPos)
+        if(initialResult != null) return initialResult
+
+        val xSize = endX - startX
+        val ySize = endY - startY
+        val zSize = endZ - startZ
+        val xIntMove = Mth.sign(xSize)
+        val yIntMove = Mth.sign(ySize)
+        val zIntMove = Mth.sign(zSize)
+        val xMove = if(xIntMove == 0) Double.MAX_VALUE else xIntMove.toDouble() / xSize
+        val yMove = if(yIntMove == 0) Double.MAX_VALUE else yIntMove.toDouble() / ySize
+        val zMove = if(zIntMove == 0) Double.MAX_VALUE else zIntMove.toDouble() / zSize
+        var x = xMove * (if(xIntMove > 0) 1.0 - Mth.frac(startX) else Mth.frac(startX))
+        var y = yMove * (if(yIntMove > 0) 1.0 - Mth.frac(startY) else Mth.frac(startY))
+        var z = zMove * (if(zIntMove > 0) 1.0 - Mth.frac(startZ) else Mth.frac(startZ))
+//        console("- start($x, $y, $z)")
+
+
+        var result: BlockHitResult? = null
+        do {
+            if(x > 1.0 && y > 1.0 && z > 1.0) {
+                return onMiss(context)
+            }
+
+            if(x < y) {
+                if(x < z) {
+                    xInt += xIntMove
+                    x += xMove
+                }else{
+                    zInt += zIntMove
+                    z += zMove
+                }
+            }else if(y < z) {
+                yInt += yIntMove
+                y += yMove
+            }else{
+                zInt += zIntMove
+                z += zMove
+            }
+            result = onMove(context, blockPos.set(xInt, yInt, zInt))
+        }while(result == null)
+
+        return result
     }
 
 }

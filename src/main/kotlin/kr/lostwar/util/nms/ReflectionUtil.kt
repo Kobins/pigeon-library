@@ -1,6 +1,7 @@
 package kr.lostwar.util.nms
 
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 
 object ReflectionUtil {
@@ -47,5 +48,29 @@ object ReflectionUtil {
         }
 
         return fieldMap[clazz]!![fieldName]!!
+    }
+
+    private val methodMap = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Method>>()
+    fun unlockMethod(clazz: Class<*>, methodName: String, vararg parameterTypes: Class<*>) {
+        try {
+            val method = clazz.getDeclaredMethod(methodName, *parameterTypes)
+            method.isAccessible = true
+            val classMethodMap = methodMap.computeIfAbsent(clazz) { ConcurrentHashMap() }
+            classMethodMap[methodName] = method
+            methodMap[clazz] = classMethodMap
+        }catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+    fun getMethod(clazz: Class<*>, methodName: String, vararg parameterTypes: Class<*>): Method {
+        if(!methodMap.containsKey(clazz) || !methodMap[clazz]!!.containsKey(methodName)) {
+            unlockMethod(clazz, methodName, *parameterTypes)
+        }
+
+        return methodMap[clazz]!![methodName]!!
+    }
+
+    fun getClass(name: String) {
+        val clazz = Class.forName("")
     }
 }

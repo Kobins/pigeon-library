@@ -25,6 +25,13 @@ fun Double.toDegrees() = Math.toDegrees(this)
 
 val IntRange.size: Int
     get() = endInclusive - start + 1
-fun ClosedFloatingPointRange<Double>.lerp(t: Double) = lerp(start, endInclusive, (t.clamp(0.0..1.0)))
+
+private val doubleRange01 = 0.0..1.0
+private val floatRange01 = 0f..1f
+fun ClosedFloatingPointRange<Double>.lerp(t: Double) = lerp(start, endInclusive, (t.clamp(doubleRange01)))
 fun ClosedFloatingPointRange<Double>.center() = lerp(0.5)
 fun ClosedFloatingPointRange<Double>.random() = lerp(Random.nextDouble())
+
+fun ClosedFloatingPointRange<Float>.lerp(t: Float) = lerp(start, endInclusive, (t.clamp(floatRange01)))
+fun ClosedFloatingPointRange<Float>.center() = lerp(0.5f)
+fun ClosedFloatingPointRange<Float>.random() = lerp(Random.nextFloat())

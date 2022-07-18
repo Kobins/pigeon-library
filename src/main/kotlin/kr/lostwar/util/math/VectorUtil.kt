@@ -3,6 +3,7 @@ package kr.lostwar.util.math
 import org.bukkit.Location
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.util.EulerAngle
 import org.bukkit.util.NumberConversions
 import org.bukkit.util.Vector
 import kotlin.math.*
@@ -41,8 +42,11 @@ object VectorUtil {
     val Vector.pitchDegreeFloat: Float
         get() = pitchDegree.toFloat()
 
-    fun Vector.toYawPitch(): Pair<Float, Float>{
+    fun Vector.toYawPitchDegree(): Pair<Float, Float>{
         return Pair(yawDegreeFloat, pitchDegreeFloat)
+    }
+    fun Vector.toYawPitch(): Pair<Float, Float>{
+        return Pair(yaw.toFloat(), pitch.toFloat())
     }
     fun fromYawPitch(yaw: Float, pitch: Float) = fromYawPitch(yaw.toDouble(), pitch.toDouble())
     fun fromYawPitch(yaw: Double, pitch: Double) = Vector(0, 0, 1).rotateAroundX(pitch).rotateAroundY(-yaw)
@@ -109,6 +113,8 @@ object VectorUtil {
     operator fun Vector.div(scala: Double) = Vector(x / scala, y / scala, z / scala)
     operator fun Vector.unaryMinus() = times(-1.0)
 
+    fun Vector.dot(location: Location) = x * location.x + y * location.y + z * location.z
+
     fun Location.modifiedX(x: Double) = Location(world, x, y, z, yaw, pitch)
     fun Location.modifiedY(y: Double) = Location(world, x, y, z, yaw, pitch)
     fun Location.modifiedZ(z: Double) = Location(world, x, y, z, yaw, pitch)
@@ -169,4 +175,6 @@ object VectorUtil {
         val up = right.getCrossProduct(forward)
         return (forward * z).add(right * x).add(up * y)
     }
+
+    fun Vector.toEulerAngle(): EulerAngle = EulerAngle(x, y, z)
 }

@@ -1,6 +1,7 @@
 package kr.lostwar.util.nms
 
-import kr.lostwar.util.math.VectorUtil.toYawPitch
+import kr.lostwar.util.math.VectorUtil.toYawPitchDegree
+import kr.lostwar.util.nms.NMSUtil.asNMSCopy
 import kr.lostwar.util.nms.NMSUtil.nmsEntity
 import kr.lostwar.util.nms.NMSUtil.nmsPlayer
 import kr.lostwar.util.nms.NMSUtil.nmsSlot
@@ -8,7 +9,6 @@ import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -39,7 +39,7 @@ object PacketUtil {
         sendPacket(packet)
     }
     fun Player.setEyeDirection(direction: Vector){
-        val (yaw, pitch) = direction.toYawPitch()
+        val (yaw, pitch) = direction.toYawPitchDegree()
         if(yaw.isNaN() || pitch.isNaN()){
             return;
         }
@@ -61,7 +61,7 @@ object PacketUtil {
 
     fun Player.sendEquipment(itemStack: ItemStack, slot: EquipmentSlot, target: Iterable<Player> = world.players) {
         val packet = ClientboundSetEquipmentPacket(entityId, listOf(
-            com.mojang.datafixers.util.Pair(slot.nmsSlot, CraftItemStack.asNMSCopy(itemStack))
+            com.mojang.datafixers.util.Pair(slot.nmsSlot, itemStack.asNMSCopy())
         ))
 
         for(player in target) {
