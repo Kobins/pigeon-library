@@ -41,12 +41,8 @@ class HoverUIEntity(
                 displayName = value
             }
         }
-    val entity = FakeArmorStand(location)
+    var entity: FakeArmorStand = createEntity()
     val dummyEntities = mutableListOf<FakeArmorStand>()
-
-    init {
-        entity.addObserver(player)
-    }
 
     /**
      * 엔티티의 위치를 가져오거나 설정합니다.
@@ -78,24 +74,25 @@ class HoverUIEntity(
 
             if(newStringsSize > entitySize){
                 for(i in 0 until gap){
-                    addEntity()
+                    addDummyEntity()
                 }
             }else if(newStringsSize < entitySize){
                 for(i in 0 until gap){
-                    removeEntity()
+                    removeDummyEntity()
                 }
             }
             fillStrings()
             field = colored
         }
 
-    private fun addEntity(){
-        val entity = FakeArmorStand(location)
+    private fun createEntity() = FakeArmorStand(location).also { it.addObserver(player) }
+
+    private fun addDummyEntity(){
+        val entity = createEntity()
         dummyEntities.add(entity)
-        entity.addObserver(player)
     }
 
-    private fun removeEntity(){
+    private fun removeDummyEntity(){
         val removed = dummyEntities.removeLastOrNull() ?: return
         removed.destroy()
     }
@@ -116,8 +113,16 @@ class HoverUIEntity(
     }
 
     internal fun tick(){
-        val oldLocation = entity.location
         val newLocation = location
+        val entity = entity.takeIf {
+            val isEntityValid = newLocation.world == player.world && player.location.distanceSquared(newLocation) <= validDistanceSquared
+            if(!isEntityValid) {
+                it.destroy()
+            }
+            isEntityValid
+        } ?: createEntity().also { entity = it }
+
+        val oldLocation = entity.location
         if(!player.isInsideVehicle && abs(oldLocation.y - newLocation.y) <= 2) { //2 이하면 느린 lerp (위아래 흔들림 제어)
             entity.location = Location(
                 newLocation.world,
@@ -155,5 +160,10 @@ class HoverUIEntity(
         if(isUnloadingSelf)
             entity.location = player.eyeLocation
         return isUnloadingSelf
+    }
+
+    companion object {
+        private const val validDistance = 32
+        private const val validDistanceSquared = validDistance * validDistance
     }
 }

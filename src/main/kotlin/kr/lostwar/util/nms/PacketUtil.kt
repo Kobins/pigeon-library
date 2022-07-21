@@ -9,6 +9,8 @@ import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import org.bukkit.Material
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -57,6 +59,11 @@ object PacketUtil {
     }
     fun Player.resetCamera(){
         setCamera(this)
+    }
+
+    fun Player.resetCooldown(material: Material) {
+        val nmsPlayer = nmsPlayer
+        nmsPlayer.cooldowns.removeCooldown(CraftMagicNumbers.getItem(material))
     }
 
     fun Player.sendEquipment(itemStack: ItemStack, slot: EquipmentSlot, target: Iterable<Player> = world.players) {

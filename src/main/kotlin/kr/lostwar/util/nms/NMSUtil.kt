@@ -184,6 +184,7 @@ object NMSUtil {
             },
             onMiss = {
                 val d = it.from.subtract(it.to)
+                onHit(maxDistance, null)
                 BlockHitResult.miss(it.to, Direction.getNearest(d.x, d.y, d.z), BlockPos(it.to))
             }
         )
