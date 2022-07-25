@@ -1,5 +1,6 @@
 package kr.lostwar.util.command
 
+import kr.lostwar.util.command.CommandUtil.register
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 
@@ -21,5 +22,8 @@ abstract class SimpleCommand(
     }
     open fun onTabComplete(sender: CommandSender, label: String, args: Array<String>): List<String>? {
         return null
+    }
+    fun register() {
+        register(fallback)
     }
 }

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.TextComponent.Builder
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration.*
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.title.Title
@@ -214,6 +215,8 @@ object ComponentUtil {
     }
     @JvmStatic val String.asComponent
         get() = LegacyComponentSerializer.legacySection().deserialize(this).noitalic()
+    @JvmStatic val String.asMiniMessage
+        get() = MiniMessage.miniMessage().deserialize(this)
 
     @JvmStatic
     fun Component.toJSONString(): String {
