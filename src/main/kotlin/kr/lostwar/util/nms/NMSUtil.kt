@@ -10,6 +10,7 @@ import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityDimensions
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.BlockHitResult
@@ -22,12 +23,14 @@ import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftRayTraceResult
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.RayTraceResult
@@ -36,7 +39,7 @@ import org.bukkit.util.Vector
 object NMSUtil {
 
     val Player.nmsPlayer: ServerPlayer; get() = (this as CraftPlayer).handle
-    val Entity.nmsEntity; get() = (this as? CraftEntity)?.handle
+    val Entity.nmsEntity; get() = (this as? CraftEntity)?.handle ?: error("tried get NMS Entity, but it was not instance of CraftEntity")
     val LivingEntity.nmsLivingEntity; get() = (this as? CraftLivingEntity)?.handle
     val World.nmsWorld: ServerLevel; get() = (this as CraftWorld).handle
     fun ItemStack.asNMSCopy(): net.minecraft.world.item.ItemStack = CraftItemStack.asNMSCopy(this)
@@ -69,13 +72,13 @@ object NMSUtil {
     )
     val EquipmentSlot.nmsSlot; get() = equipmentSlotBukkitToNMS[this]!!
 
-    // 1.19 obfucscation https://piston-data.mojang.com/v1/objects/1c1cea17d5cd63d68356df2ef31e724dd09f8c26/server.txt
+    // 1.19.1 obfucscation https://piston-data.mojang.com/v1/objects/3565648cdd47ae15738fb804a95a659137d7cfd3/server.txt
 
     private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba")
     private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ")
 
     fun org.bukkit.entity.Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
-        val nmsEntity = nmsEntity ?: return
+        val nmsEntity = nmsEntity
         // 1.19
         if(eye != null)
             entityEyeHeightField.setFloat(nmsEntity, eye)
@@ -84,40 +87,44 @@ object NMSUtil {
 
     private val collideMethod = ReflectionUtil.getMethod(net.minecraft.world.entity.Entity::class.java, "g", Vec3::class.java)
     fun org.bukkit.entity.Entity.tryCollideAndGetModifiedVelocity(velocity: Vector): Vector {
-        val nmsEntity = nmsEntity ?: return velocity
+        val nmsEntity = nmsEntity
         val vec = Vec3(velocity.x, velocity.y, velocity.z)
         val resultVec = collideMethod.invoke(nmsEntity, vec) as Vec3
         return Vector(resultVec.x, resultVec.y, resultVec.z)
     }
 
     fun org.bukkit.entity.Entity.setPosition(position: Vector) {
-        val nmsEntity = nmsEntity ?: return
+        val nmsEntity = nmsEntity
         nmsEntity.setPos(position.x, position.y, position.z)
     }
 
 
     fun org.bukkit.entity.Entity.setNoPhysics(noPhysics: Boolean) {
-        val nmsEntity = nmsEntity ?: return
+        val nmsEntity = nmsEntity
         nmsEntity.noPhysics = noPhysics
     }
 
     fun org.bukkit.entity.Entity.setIsOnGround(onGround: Boolean) {
-        val nmsEntity = nmsEntity ?: return
+        val nmsEntity = nmsEntity
         nmsEntity.isOnGround = onGround
     }
 
+    fun org.bukkit.entity.Entity.setImpulse() {
+        val nmsEntity = nmsEntity
+        nmsEntity.hasImpulse = true
+    }
 
     fun org.bukkit.entity.Entity.setMaxUpStep(maxUpStep: Float) {
-        val nmsEntity = nmsEntity ?: return
+        val nmsEntity = nmsEntity
         nmsEntity.maxUpStep = maxUpStep
     }
 
     fun org.bukkit.entity.Entity.hasVerticalCollision(): Boolean {
-        val nmsEntity = nmsEntity ?: return false
+        val nmsEntity = nmsEntity
         return nmsEntity.verticalCollision
     }
     fun org.bukkit.entity.Entity.hasVerticalCollisionBelow(): Boolean {
-        val nmsEntity = nmsEntity ?: return false
+        val nmsEntity = nmsEntity
         return nmsEntity.verticalCollisionBelow
     }
 
@@ -131,8 +138,31 @@ object NMSUtil {
         nmsEntity.travel(Vec3(movementInput.x, movementInput.y, movementInput.z))
     }
 
-    fun isUnderwater() {
-
+    private fun DamageCause.toNMS() = when(this) {
+        DamageCause.CUSTOM -> DamageSource.GENERIC
+        DamageCause.FIRE -> DamageSource.IN_FIRE
+        DamageCause.FIRE_TICK -> DamageSource.ON_FIRE
+        DamageCause.STARVATION -> DamageSource.STARVE
+        DamageCause.WITHER -> DamageSource.WITHER
+        DamageCause.DROWNING -> DamageSource.DROWN
+        DamageCause.MELTING -> CraftEventFactory.MELTING
+        DamageCause.POISON -> CraftEventFactory.POISON
+        DamageCause.MAGIC -> DamageSource.MAGIC
+        DamageCause.FALL -> DamageSource.FALL
+        DamageCause.FLY_INTO_WALL -> DamageSource.FLY_INTO_WALL
+        DamageCause.CRAMMING -> DamageSource.CRAMMING
+        DamageCause.DRYOUT -> DamageSource.DRY_OUT
+        DamageCause.FREEZE -> DamageSource.FREEZE
+        DamageCause.FALLING_BLOCK -> DamageSource.FALLING_BLOCK // fixme
+        DamageCause.LIGHTNING -> DamageSource.LIGHTNING_BOLT // fixme?
+        DamageCause.DRAGON_BREATH -> DamageSource.DRAGON_BREATH
+        DamageCause.CONTACT -> DamageSource.CACTUS // fixme
+        DamageCause.HOT_FLOOR -> DamageSource.HOT_FLOOR
+        else -> error("failed to parse DamageCause.${this} to NMS DamageSource")
+    }
+    fun org.bukkit.entity.Entity.damage(amount: Double, cause: DamageCause): Boolean {
+        val nmsEntity = nmsEntity
+        return nmsEntity.hurt(cause.toNMS(), amount.toFloat())
     }
 
     enum class RayTraceContinuation {

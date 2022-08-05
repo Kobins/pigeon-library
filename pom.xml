@@ -23,7 +23,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>1.6.10</kotlin.version>
-        <minecraft.version>1.19</minecraft.version>
+        <minecraft.version>1.19.1</minecraft.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <maven.compiler.useIncrementalCompilation>true</maven.compiler.useIncrementalCompilation>
     </properties>

@@ -57,13 +57,13 @@ object BoatNMSUtil {
         return frictionSum / frictionCount
     }
 
-    fun Entity.getWaterLevel(): Pair<Double, Boolean> {
+    fun Entity.getWaterLevel(epsilon: Double = 0.1): Pair<Double, Boolean> {
         val nmsEntity = nmsEntity ?: return 0.0 to false
         val aabb = nmsEntity.boundingBox
         val minX = Mth.floor(aabb.minX)
         val maxX = Mth.ceil(aabb.maxX)
         val minY = Mth.floor(aabb.minY)
-        val maxY = Mth.ceil(aabb.minY + 0.001)
+        val maxY = Mth.ceil(aabb.minY + epsilon)
         val minZ = Mth.floor(aabb.minZ)
         val maxZ = Mth.ceil(aabb.maxZ)
 
@@ -125,7 +125,7 @@ object BoatNMSUtil {
     }
 
     fun Entity.isUnderWater(): BoatState? {
-        val nmsEntity = nmsEntity ?: return null
+        val nmsEntity = nmsEntity
         val aabb = nmsEntity.boundingBox
         val upper = aabb.maxY + 0.001
         val minX = Mth.floor(aabb.minX)
