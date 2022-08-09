@@ -76,6 +76,7 @@ object NMSUtil {
 
     private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba")
     private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ")
+    private val entityHardCollidesField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "hardCollides")
 
     fun org.bukkit.entity.Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
         val nmsEntity = nmsEntity
@@ -98,10 +99,18 @@ object NMSUtil {
         nmsEntity.setPos(position.x, position.y, position.z)
     }
 
-
     fun org.bukkit.entity.Entity.setNoPhysics(noPhysics: Boolean) {
         val nmsEntity = nmsEntity
         nmsEntity.noPhysics = noPhysics
+    }
+
+    fun org.bukkit.entity.Entity.setHardCollides(hardCollides: Boolean) {
+        val nmsEntity = nmsEntity
+        entityHardCollidesField.setBoolean(nmsEntity, hardCollides)
+    }
+    fun org.bukkit.entity.Entity.isHardCollides(): Boolean {
+        val nmsEntity = nmsEntity
+        return entityHardCollidesField.getBoolean(nmsEntity)
     }
 
     fun org.bukkit.entity.Entity.setIsOnGround(onGround: Boolean) {

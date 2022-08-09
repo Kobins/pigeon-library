@@ -10,9 +10,9 @@ import kotlin.math.max
 import kotlin.math.min
 
 data class Region(
-    val x: IntRange,
-    val y: IntRange,
-    val z: IntRange,
+    var x: IntRange,
+    var y: IntRange,
+    var z: IntRange,
 ) {
     constructor(
         x1: Int, y1: Int, z1: Int,

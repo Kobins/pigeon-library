@@ -1,6 +1,7 @@
 package kr.lostwar.util.math
 
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.util.EulerAngle
@@ -84,18 +85,18 @@ object VectorUtil {
         return "${toVectorString()}, ${direction.yawDegreeFloat}, ${direction.pitchDegreeFloat}"
     }
 
-    fun fromLocationString(string: String?): Pair<Vector, Vector>{
+    fun fromLocationString(string: String?, world: World? = null): Location {
         if(string == null){
-            return Pair(Vector(0, 64, 0), Vector(0, 0, 1))
+            return Location(world, 0.0, 64.0, 0.0)
         }
-        val splitted = string.split(',').map { it.trim() }
-        val x = splitted.getOrNull(0)?.toDoubleOrNull() ?: 0.0
-        val y = splitted.getOrNull(1)?.toDoubleOrNull() ?: 64.0
-        val z = splitted.getOrNull(2)?.toDoubleOrNull() ?: 0.0
-        val yaw = splitted.getOrNull(3)?.toDoubleOrNull() ?: 0.0
-        val pitch = splitted.getOrNull(4)?.toDoubleOrNull() ?: 0.0
+        val split = string.split(',').map { it.trim() }
+        val x = split.getOrNull(0)?.toDoubleOrNull() ?: 0.0
+        val y = split.getOrNull(1)?.toDoubleOrNull() ?: 64.0
+        val z = split.getOrNull(2)?.toDoubleOrNull() ?: 0.0
+        val yaw = split.getOrNull(3)?.toFloatOrNull() ?: 0f
+        val pitch = split.getOrNull(4)?.toFloatOrNull() ?: 0f
 //    println("fromLocationString($string) -> $x, $y, $z, $yaw, $pitch")
-        return Pair(Vector(x, y, z), fromYawPitch(Math.toRadians(yaw), Math.toRadians(pitch)))
+        return Location(world, x, y, z, yaw, pitch)
     }
 
     val Vector.normalized: Vector
