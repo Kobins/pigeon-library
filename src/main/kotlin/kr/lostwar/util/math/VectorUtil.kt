@@ -178,4 +178,13 @@ object VectorUtil {
     }
 
     fun Vector.toEulerAngle(): EulerAngle = EulerAngle(x, y, z)
+
+    fun Location.copy(
+        world: World? = this.world,
+        x: Double = this.x,
+        y: Double = this.y,
+        z: Double = this.z,
+        yaw: Float = this.yaw,
+        pitch: Float = this.pitch,
+    ) = Location(world, x, y, z, yaw, pitch)
 }
