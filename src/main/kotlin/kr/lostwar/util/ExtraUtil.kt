@@ -5,6 +5,7 @@ import org.bukkit.entity.Player
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.toJavaDuration
 
 operator fun <T : Any> Collection<T>.plus(collection: Collection<T>): List<T>{
     val result = ArrayList<T>(size + collection.size)
@@ -34,3 +35,5 @@ val Long.ticks: Duration; get() = (this * 50).milliseconds
 val Duration.inTicks: Long
     get() = inWholeMilliseconds / 50
 
+val Duration.java: java.time.Duration
+    get() = toJavaDuration()

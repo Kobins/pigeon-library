@@ -1,16 +1,20 @@
 package kr.lostwar.util.scoreboard
 
+import kr.lostwar.util.scoreboard.filler.GeneralScoreboardFiller
+import kr.lostwar.util.scoreboard.filler.PlayerScoreboardFiller
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.DisplaySlot
 import java.util.*
 
-class PlayerScoreboardController(
+class PlayerScoreboardController private constructor(
     val player: Player,
 ) : ScoreboardController<Component> {
     companion object {
+        var scoreboardFiller: (PlayerScoreboardController) -> PlayerScoreboardFiller = { GeneralScoreboardFiller(it) }
         private val playerScoreboardMap = HashMap<UUID, PlayerScoreboardController>()
+
         @JvmStatic
         val Player.scoreboardController: PlayerScoreboardController
             get() = playerScoreboardMap.computeIfAbsent(uniqueId) { PlayerScoreboardController(this) }
@@ -26,50 +30,14 @@ class PlayerScoreboardController(
     }
     var title: Component
         get() = objective.displayName()
-        set(value) { if(value != objective.displayName()) objective.displayName(value) }
-
-    private var lastContent: List<Component> = emptyList()
+        set(value) {
+            if (value != objective.displayName()) objective.displayName(value)
+        }
 
     init {
         player.scoreboard = scoreboard
     }
-    private val colors = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray()
-    private val teamStrings = colors.map { "§${it}§r" }
-    private val Int.teamString: String get() = teamStrings[this % teamStrings.size]
-    private fun Int.getScore(size: Int) = size - this - 1
-    private fun Int.updateScore(size: Int): Int {
-        val score = getScore(size)
-        objective.getScore(teamString).score = score
-        return score
-    }
-    override fun setContent(content: List<Component>) {
-        if (lastContent == content)
-            return
-//        console("content changed: ${lastContent.size} -> ${content.size}")
-        val reduced = content.size < lastContent.size
-        if(reduced) {
-//            console("- reduced, clear ${content.size}(${content.size.getScore(lastContent.size)}) until ${lastContent.size}(${lastContent.size.getScore(lastContent.size)})")
-            (content.size..lastContent.size).forEach { index ->
-                scoreboard.resetScores(index.teamString)
-//                console("  * removed $index")
-            }
-        }
-        for ((index, line) in content.withIndex()) {
-            val teamString = index.teamString
-            val team = scoreboard.getTeam(teamString) ?: scoreboard.registerNewTeam(teamString)
-            if(!team.hasEntry(teamString)) {
-                team.addEntry(teamString)
-            }
-            if(objective.getScore(teamString).score != index.getScore(content.size)
-                || index >= lastContent.size
-                || line != lastContent[index]
-            ){
-//                consoleRaw(text("[${index}, ${index.getScore(content.size)}] ", NamedTextColor.GOLD).append(line))
-                team.prefix(line)
-                index.updateScore(content.size)
-            }
-        }
 
-        lastContent = content
-    }
+    private val filler = scoreboardFiller(this)
+    override fun setContent(content: List<Component>) = filler.setContent(content)
 }
