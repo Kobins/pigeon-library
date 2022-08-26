@@ -17,16 +17,32 @@
             <id>dmulloy2-repo</id>
             <url>https://repo.dmulloy2.net/repository/public/</url>
         </repository>
+<!--        <repository>-->
+<!--            <id>nexus</id>-->
+<!--            <url>http://${NEXUS-HOST}/repository/maven-public/</url>-->
+<!--        </repository>-->
     </repositories>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>1.6.10</kotlin.version>
-        <minecraft.version>1.19.1</minecraft.version>
+        <minecraft.version>1.19.2</minecraft.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <maven.compiler.useIncrementalCompilation>true</maven.compiler.useIncrementalCompilation>
+        <NEXUS-HOST>marsys.kr:10012</NEXUS-HOST>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://${NEXUS-HOST}/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://${NEXUS-HOST}/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -133,7 +149,6 @@
                 </executions>
             </plugin>
             <plugin>
-
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
@@ -152,6 +167,29 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <serverId>nexus</serverId>
+                    <nexusUrl>http://${NEXUS-HOST}/nexus/</nexusUrl>
+                    <skipStaging>true</skipStaging>
+                </configuration>
             </plugin>
         </plugins>
 
