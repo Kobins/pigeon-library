@@ -3,6 +3,7 @@ package kr.lostwar.util.ui.hover
 import kr.lostwar.util.math.lerp
 import kr.lostwar.util.nms.FakeArmorStand
 import kr.lostwar.util.ui.text.StringUtil.mapColored
+import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -14,7 +15,7 @@ class HoverUIEntity(
     val player: Player,
     val key: String,
     location: Location,
-    var targettingLocation: Location, // just storing data
+    var targetLocation: Location, // just storing data
     item: ItemStack,
     var onClick: (HoverUISession, HoverUIEntity, Boolean) -> Unit,
 ){
@@ -60,12 +61,12 @@ class HoverUIEntity(
             val colored = raw.mapColored()
             fun fillStrings(){
                 if(colored.isEmpty()){
-                    entity.displayName = ""
+                    entity.displayName = Component.empty()
                     return
                 }
-                entity.displayName = colored[0]
+                entity.displayNameMiniMessage = colored[0]
                 for (i in 1 until colored.size) {
-                    dummyEntities[i - 1].displayName = colored[i]
+                    dummyEntities[i - 1].displayNameMiniMessage = colored[i]
                 }
             }
             val entitySize = dummyEntities.size

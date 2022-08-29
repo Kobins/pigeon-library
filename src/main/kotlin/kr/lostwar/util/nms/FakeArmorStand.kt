@@ -8,6 +8,9 @@ import kr.lostwar.util.nms.NMSUtil.asNMSCopy
 import kr.lostwar.util.nms.NMSUtil.nmsWorld
 import kr.lostwar.util.nms.NMSUtil.toNMSComponent
 import kr.lostwar.util.nms.PacketUtil.sendPacket
+import kr.lostwar.util.ui.ComponentUtil.asMiniMessage
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minecraft.core.Rotations
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.entity.EquipmentSlot
@@ -151,14 +154,23 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
             }
         }
 
-    var displayName: String? = null
+    var displayNameMiniMessage: String?
+        get() {
+            return displayName?.let { MiniMessage.miniMessage().serialize(it) }
+        }
         set(value) {
-            if(field != value){
+            displayName = value?.asMiniMessage
+        }
+
+    var displayName: Component? = Component.empty()
+        set(value) {
+            if(field != value) {
                 changed = true
             }
             field = value
-            nmsArmorStand.customName = value.toNMSComponent()
-            nmsArmorStand.isCustomNameVisible = value != null && value.isNotBlank()
+
+            nmsArmorStand.customName = value?.toNMSComponent()
+            nmsArmorStand.isCustomNameVisible = value != null
         }
 
     var head: ItemStack = ItemStack(AIR)

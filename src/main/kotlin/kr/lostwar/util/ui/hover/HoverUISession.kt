@@ -60,7 +60,7 @@ class HoverUISession(
                 .map {
                     it.value to raycasted.distanceSquared(
                         // 목표를 구 좌표로 변환한 location과 raycasted 사이의 거리
-                        (it.value.targettingLocation - player.eyeLocation).toVector()
+                        (it.value.targetLocation - player.eyeLocation).toVector()
                             .normalize()
                             .multiply(radius)
                     )
@@ -72,12 +72,12 @@ class HoverUISession(
 
         for((_, entity) in entityMap){
             val isHovered = currentHoveredEntity == entity
-            val distance = player.eyeLocation.distance(entity.targettingLocation)
+            val distance = player.eyeLocation.distance(entity.targetLocation)
             val radius = if(isHovered) hoveredRadius else radius
             // 플레이어 머리 위치 -> 실제 목표 위치
-            val direction = (entity.targettingLocation - player.eyeLocation).toVector().normalized
+            val direction = (entity.targetLocation - player.eyeLocation).toVector().normalized
             val location = if(distance < radius) {
-                entity.targettingLocation
+                entity.targetLocation
             }else {
                 direction.normalized
                     .multiply(radius)

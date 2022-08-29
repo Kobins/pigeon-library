@@ -44,6 +44,7 @@ object NMSUtil {
     val World.nmsWorld: ServerLevel; get() = (this as CraftWorld).handle
     fun ItemStack.asNMSCopy(): net.minecraft.world.item.ItemStack = CraftItemStack.asNMSCopy(this)
     fun String?.toNMSComponent(): net.minecraft.network.chat.Component = CraftChatMessage.fromStringOrNull(this)
+    fun Component.toNMSComponent(): net.minecraft.network.chat.Component = CraftChatMessage.fromJSON(toJSONString())
     fun Player.getExpToDrop(block: Block): Int {
         val pos = BlockPos(block.x, block.y, block.z)
         val level = world.nmsWorld
