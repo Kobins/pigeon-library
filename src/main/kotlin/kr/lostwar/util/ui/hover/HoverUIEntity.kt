@@ -42,8 +42,6 @@ class HoverUIEntity(
                 displayName = value
             }
         }
-    var entity: FakeArmorStand = createEntity()
-    val dummyEntities = mutableListOf<FakeArmorStand>()
 
     /**
      * 엔티티의 위치를 가져오거나 설정합니다.
@@ -53,6 +51,8 @@ class HoverUIEntity(
         set(value) {
             field = value
         }
+    var entity: FakeArmorStand = createEntity()
+    val dummyEntities = mutableListOf<FakeArmorStand>()
     /**
      * 표시되는 이름을 설정합니다.
      */
