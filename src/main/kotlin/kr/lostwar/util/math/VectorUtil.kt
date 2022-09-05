@@ -98,6 +98,19 @@ object VectorUtil {
 //    println("fromLocationString($string) -> $x, $y, $z, $yaw, $pitch")
         return Location(world, x, y, z, yaw, pitch)
     }
+    fun fromLocationStringOrNull(string: String?, world: World? = null): Location? {
+        if(string == null){
+            return null
+        }
+        val split = string.split(',').map { it.trim() }
+        val x = split.getOrNull(0)?.toDoubleOrNull() ?: return null
+        val y = split.getOrNull(1)?.toDoubleOrNull() ?: return null
+        val z = split.getOrNull(2)?.toDoubleOrNull() ?: return null
+        val yaw = split.getOrNull(3)?.toFloatOrNull() ?: return null
+        val pitch = split.getOrNull(4)?.toFloatOrNull() ?: return null
+//    println("fromLocationString($string) -> $x, $y, $z, $yaw, $pitch")
+        return Location(world, x, y, z, yaw, pitch)
+    }
 
     val Vector.normalized: Vector
         get() = clone().normalize()
