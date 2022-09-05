@@ -3,16 +3,19 @@ package kr.lostwar.util.nms
 import kr.lostwar.util.math.VectorUtil
 import kr.lostwar.util.math.VectorUtil.normalized
 import kr.lostwar.util.math.VectorUtil.times
+import kr.lostwar.util.nms.PacketUtil.sendPacket
 import kr.lostwar.util.ui.ComponentUtil.toJSONString
 import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityDimensions
 import net.minecraft.world.level.ClipContext
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
 import org.bukkit.FluidCollisionMode
@@ -20,6 +23,7 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.craftbukkit.v1_19_R1.CraftFluidCollisionMode
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
@@ -296,6 +300,18 @@ object NMSUtil {
         }while(result == null)
 
         return result
+    }
+
+    fun sendPrimaryLine(block: Block, player: Player, primaryLine: Component) {
+        val craftBlock = (block as CraftBlock)
+        val nmsBlock = craftBlock.handle
+        val signEntity = nmsBlock.getBlockEntity(craftBlock.position, BlockEntityType.SIGN)
+        if(!signEntity.isPresent) return
+        val sign = signEntity.get()
+        val packet = ClientboundBlockEntityDataPacket.create(sign) {
+            it.saveWithFullMetadata().apply { putString("Text1", primaryLine.toJSONString()) }
+        }
+        player.sendPacket(packet)
     }
 
 }

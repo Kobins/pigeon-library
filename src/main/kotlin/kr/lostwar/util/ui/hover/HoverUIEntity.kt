@@ -58,7 +58,7 @@ class HoverUIEntity(
      */
     var displayName: List<String> = normalDisplayName
         set(raw) {
-            val colored = raw.mapColored()
+            val colored = raw
             fun fillStrings(){
                 if(colored.isEmpty()){
                     entity.displayName = Component.empty()
