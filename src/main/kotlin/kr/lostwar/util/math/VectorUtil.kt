@@ -187,7 +187,11 @@ object VectorUtil {
     fun Vector.localToWorld(forward: Vector): Vector {
         val right = forward.getCrossProduct(UP)
         val up = right.getCrossProduct(forward)
-        return (forward * z).add(right * x).add(up * y)
+        return Vector(
+            x * right.x + y * up.x + z * forward.x,
+            x * right.y + y * up.y + z * forward.y,
+            x * right.z + y * up.z + z * forward.z,
+        )
     }
 
     fun Vector.toEulerAngle(): EulerAngle = EulerAngle(x, y, z)
