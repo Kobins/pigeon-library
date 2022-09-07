@@ -53,7 +53,7 @@ object VectorUtil {
     fun fromYawPitch(yaw: Double, pitch: Double) = Vector(0, 0, 1).rotateAroundX(pitch).rotateAroundY(-yaw)
 
     fun lerp(start: Vector, end: Vector, t: Double) = start.clone().multiply(1-t).add(end.clone().multiply(t))
-    fun lerp(start: Location, end: Location, t: Double) = start.clone().multiply(1-t).add(end.clone().multiply(t))
+    fun lerp(start: Location, end: Location, t: Double) = start.copy().multiply(1-t).add(end.copy().multiply(t))
 
     fun Location.getDisplayString() = String.format("%.3f, %.3f, %.3f", x, y, z)
     fun Vector.getDisplayString() = String.format("%.3f, %.3f, %.3f", x, y, z)
