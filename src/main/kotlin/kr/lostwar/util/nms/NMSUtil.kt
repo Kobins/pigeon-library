@@ -5,6 +5,7 @@ import kr.lostwar.util.math.VectorUtil.normalized
 import kr.lostwar.util.math.VectorUtil.times
 import kr.lostwar.util.nms.PacketUtil.sendPacket
 import kr.lostwar.util.ui.ComponentUtil.toJSONString
+import kr.lostwar.util.ui.text.console
 import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -303,13 +304,19 @@ object NMSUtil {
     }
 
     fun sendPrimaryLine(block: Block, player: Player, primaryLine: Component) {
+//        console("sendPrimaryLine(${block}, ${player}, ${primaryLine.toJSONString()})")
         val craftBlock = (block as CraftBlock)
-        val nmsBlock = craftBlock.handle
-        val signEntity = nmsBlock.getBlockEntity(craftBlock.position, BlockEntityType.SIGN)
-        if(!signEntity.isPresent) return
-        val sign = signEntity.get()
-        val packet = ClientboundBlockEntityDataPacket.create(sign) {
-            it.saveWithFullMetadata().apply { putString("Text1", primaryLine.toJSONString()) }
+        val nmsWorld = craftBlock.craftWorld.handle
+        val blockPos = craftBlock.position
+        val signEntity = BlockEntityType.SIGN.getBlockEntity(nmsWorld, blockPos)
+            ?: BlockEntityType.SIGN.create(blockPos, nmsWorld.getBlockState(blockPos)).also {
+                nmsWorld.setBlockEntity(it)
+            }
+        val packet = ClientboundBlockEntityDataPacket.create(signEntity) {
+            val original = it.saveWithFullMetadata()
+//                .also { console("original: $it") }
+            original.apply { putString("Text1", primaryLine.toJSONString()) }
+//                .also { console("modified: $it") }
         }
         player.sendPacket(packet)
     }
