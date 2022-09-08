@@ -34,6 +34,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
             if(!headRotateByPose){
                 yRot = location.yaw
             }
+            isVisible = false
             isNoGravity = true
         }
     }

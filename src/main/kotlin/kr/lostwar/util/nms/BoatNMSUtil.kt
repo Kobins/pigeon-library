@@ -4,6 +4,7 @@ import kr.lostwar.util.nms.NMSUtil.nmsEntity
 import net.minecraft.core.BlockPos.MutableBlockPos
 import net.minecraft.tags.FluidTags
 import net.minecraft.util.Mth
+import net.minecraft.world.level.material.FluidState
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.Shapes
 import org.bukkit.entity.Entity
@@ -138,12 +139,12 @@ object BoatNMSUtil {
         var flag = false
         val v = MutableBlockPos()
         val level = nmsEntity.level
-
+        var fluid: FluidState
         for(x in minX until maxX) {
             for(z in minZ until maxZ) {
                 for(y in minY until maxY) {
                     v.set(x, y, z)
-                    val fluid = level.getFluidState(v)
+                    fluid = level.getFluidState(v)
                     if(fluid.`is`(FluidTags.WATER) && upper < (v.y + fluid.getHeight(level, v))) {
                         if(!fluid.isSource) {
                             return BoatState.UNDER_FLOWING_WATER
