@@ -91,24 +91,26 @@ data class Region(
             return contains(block.location)
         }
 
-        fun ConfigurationSection.getRegion(dir: String, def: Region = Region(0, 0, 0, 0, 0, 0)): Region {
-            val minRaw = getString("$dir.min") ?: return def
-            val minArray = minRaw.split(',').map { it.trim().toIntOrNull() }
-            val minX = minArray.getOrNull(0) ?: def.x.first
-            val minY = minArray.getOrNull(1) ?: def.y.first
-            val minZ = minArray.getOrNull(2) ?: def.z.first
+        fun ConfigurationSection.getRegionOrNull(dir: String): Region? {
+            val minRaw = getString("$dir.min") ?: return null
+            val minArray = minRaw.split(',').map { it.trim() }
+            if(minArray.size < 3) return null
+            val minX = minArray[0].toIntOrNull() ?: return null
+            val minY = minArray[1].toIntOrNull() ?: return null
+            val minZ = minArray[2].toIntOrNull() ?: return null
 
-            val maxRaw = getString("$dir.max") ?: return def
-            val maxArray = maxRaw.split(',').map { it.trim().toIntOrNull() }
-            val maxX = maxArray.getOrNull(0) ?: def.x.last
-            val maxY = maxArray.getOrNull(1) ?: def.y.last
-            val maxZ = maxArray.getOrNull(2) ?: def.z.last
+            val maxRaw = getString("$dir.max") ?: return null
+            val maxArray = maxRaw.split(',').map { it.trim() }
+            if(minArray.size < 3) return null
+            val maxX = maxArray[0].toIntOrNull() ?: return null
+            val maxY = maxArray[1].toIntOrNull() ?: return null
+            val maxZ = maxArray[2].toIntOrNull() ?: return null
 
             return Region(minX, minY, minZ, maxX, maxY, maxZ)
         }
         fun ConfigurationSection.setRegion(dir: String, region: Region) {
-            set("$dir.min", region.min.toVectorString())
-            set("$dir.max", region.max.toVectorString())
+            set("$dir.min", "${region.x.first}, ${region.y.first}, ${region.z.first}")
+            set("$dir.max", "${region.x.last}, ${region.y.last}, ${region.z.last}")
         }
     }
 

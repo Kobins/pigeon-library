@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
@@ -33,6 +34,7 @@ import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftRayTraceResult
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Item
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
@@ -319,6 +321,13 @@ object NMSUtil {
 //                .also { console("modified: $it") }
         }
         player.sendPacket(packet)
+    }
+
+    fun fakePickUp(entity: Entity, item: Item) {
+        val packet = ClientboundTakeItemEntityPacket(item.entityId, entity.entityId, 1)
+        for(player in entity.world.players) {
+            player.sendPacket(packet)
+        }
     }
 
 }
