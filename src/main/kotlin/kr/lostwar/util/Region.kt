@@ -41,6 +41,9 @@ data class Region(
     operator fun contains(location: Location): Boolean {
         return location.blockX in x && location.blockY in y && location.blockZ in z
     }
+    fun contains(x: Int, z: Int): Boolean {
+        return x in this.x && z in this.z
+    }
     operator fun contains(entity: Entity): Boolean {
         return contains(entity.location)
     }
@@ -89,6 +92,14 @@ data class Region(
         }
         operator fun Iterable<Region>.contains(block: Block): Boolean {
             return contains(block.location)
+        }
+        fun Iterable<Region>.contains(x: Int, z: Int): Boolean {
+            for(region in this){
+                if(region.contains(x, z)){
+                    return true
+                }
+            }
+            return false
         }
 
         fun ConfigurationSection.getRegionOrNull(dir: String): Region? {
