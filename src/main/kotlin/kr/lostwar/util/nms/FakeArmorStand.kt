@@ -34,6 +34,8 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
             if(!headRotateByPose){
                 yRot = location.yaw
             }
+        }
+        nmsArmorStand.apply {
             isVisible = false
             isNoGravity = true
         }

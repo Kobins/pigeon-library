@@ -3,6 +3,7 @@ package kr.lostwar.util.ui.hover
 import kr.lostwar.util.math.lerp
 import kr.lostwar.util.nms.FakeArmorStand
 import kr.lostwar.util.ui.text.StringUtil.mapColored
+import kr.lostwar.util.ui.text.console
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -47,11 +48,17 @@ class HoverUIEntity(
      * 엔티티의 위치를 가져오거나 설정합니다.
      * yaw는 엔티티 방향으로, pitch는 headPose로 설정됩니다.
      */
+    var oldLocation: Location = location
     var location: Location = location
         set(value) {
+            oldLocation = location
             field = value
         }
-    var entity: FakeArmorStand = createEntity()
+    var entity: FakeArmorStand = createEntity(location)
+        set(value) {
+//            console("hover entity ${this.key} entity = ${value} (from ${field})")
+            field = value
+        }
     val dummyEntities = mutableListOf<FakeArmorStand>()
     /**
      * 표시되는 이름을 설정합니다.
@@ -86,10 +93,13 @@ class HoverUIEntity(
             field = colored
         }
 
-    private fun createEntity() = FakeArmorStand(location).also { it.addObserver(player) }
+    private fun createEntity(location: Location) = FakeArmorStand(location).also {
+        it.addObserver(player);
+//        console("hover entity ${key} createEntity(${location})")
+    }
 
     private fun addDummyEntity(){
-        val entity = createEntity()
+        val entity = createEntity(location)
         dummyEntities.add(entity)
     }
 
@@ -116,12 +126,14 @@ class HoverUIEntity(
     internal fun tick(){
         val newLocation = location
         val entity = entity.takeIf {
-            val isEntityValid = newLocation.world == player.world && player.location.distanceSquared(newLocation) <= validDistanceSquared
+            val isEntityValid = newLocation.world == player.world
+                    && newLocation.distanceSquared(oldLocation) <= validDistanceSquared
             if(!isEntityValid) {
+//                console("hover entity ${this.key} invalidated")
                 it.destroy()
             }
             isEntityValid
-        } ?: createEntity().also { entity = it }
+        } ?: createEntity(location).also { entity = it }
 
         val oldLocation = entity.location
         if(!player.isInsideVehicle && abs(oldLocation.y - newLocation.y) <= 2) { //2 이하면 느린 lerp (위아래 흔들림 제어)
