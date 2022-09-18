@@ -57,7 +57,12 @@ class TopUI(
     private var visible: Boolean = true
     private var progress: Double
     override fun getProgress() = progress
-    override fun setProgress(progress: Double) { this.progress = progress }
+    override fun setProgress(progress: Double) {
+        if(this.progress != progress) {
+            this.progress = progress
+            broadcast(ClientboundBossEventPacket::createUpdateProgressPacket)
+        }
+    }
     val playerSet = HashSet<Player>()
     init {
         progress = 0.0
