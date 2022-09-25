@@ -5,7 +5,6 @@ import kr.lostwar.util.math.VectorUtil.normalized
 import kr.lostwar.util.math.VectorUtil.times
 import kr.lostwar.util.nms.PacketUtil.sendPacket
 import kr.lostwar.util.ui.ComponentUtil.toJSONString
-import kr.lostwar.util.ui.text.console
 import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -327,6 +326,13 @@ object NMSUtil {
         val packet = ClientboundTakeItemEntityPacket(item.entityId, entity.entityId, 1)
         for(player in entity.world.players) {
             player.sendPacket(packet)
+        }
+    }
+
+    fun Entity.updatePassengersPosition() {
+        val nmsEntity = nmsEntity
+        for(entity in nmsEntity.passengers) {
+            nmsEntity.positionRider(entity)
         }
     }
 
