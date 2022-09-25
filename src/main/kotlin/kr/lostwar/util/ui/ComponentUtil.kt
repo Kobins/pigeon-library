@@ -48,7 +48,7 @@ object ComponentUtil {
     @JvmStatic fun Component.white() = color(NamedTextColor.WHITE).noitalic()
     @JvmStatic fun Component.noitalic() = decoration(ITALIC, false)
     @JvmStatic fun Component.appendSpace() = append(Component.space())
-    @JvmStatic fun Component.font(key: Key?) = style(style().font(key))
+    @JvmStatic fun Component.applyFont(key: Key?) = style(style().font(key))
 
 
 
