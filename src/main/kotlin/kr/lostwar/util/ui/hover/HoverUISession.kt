@@ -72,6 +72,7 @@ class HoverUISession(
 
         for((_, entity) in entityMap){
             val isHovered = currentHoveredEntity == entity
+            if(player.world != entity.targetLocation.world) continue
             val distance = player.eyeLocation.distance(entity.targetLocation)
             val radius = if(isHovered) hoveredRadius else radius
             // 플레이어 머리 위치 -> 실제 목표 위치
