@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -92,6 +93,8 @@ class HoverUIEntity(
             fillStrings()
             field = colored
         }
+
+    var relativeDirection: Vector? = null
 
     private fun createEntity(location: Location) = FakeArmorStand(location).also {
         it.addObserver(player);

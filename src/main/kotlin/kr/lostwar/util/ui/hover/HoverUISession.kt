@@ -1,15 +1,25 @@
 package kr.lostwar.util.ui.hover
 
 import kr.lostwar.PigeonLibraryPlugin
+import kr.lostwar.util.math.VectorUtil
 import kr.lostwar.util.math.VectorUtil.minus
 import kr.lostwar.util.math.VectorUtil.normalized
+import kr.lostwar.util.math.VectorUtil.plus
+import kr.lostwar.util.math.VectorUtil.times
 import kr.lostwar.util.math.VectorUtil.unaryMinus
+import kr.lostwar.util.math.toRadians
 import kr.lostwar.util.ui.hover.HoverUI.Companion.hoverUI
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
+import org.bukkit.util.Vector
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sin
 
 class HoverUISession(
     val player: Player,
@@ -20,6 +30,22 @@ class HoverUISession(
     var detectRange: Double = 1.5
     var useMouseHover = true
     var onTick: (HoverUIEntity) -> Unit = {}
+    var playerFOVInRadian = 70.0.toRadians()
+        set(value) {
+            field = value
+            updateConstants()
+        }
+    private var playerFOVHalfInRadian = 0.0
+    private var playerCosFOVHalf = 0.0
+    private var playerSinFOVHalf = 0.0
+    private fun updateConstants() {
+        playerFOVHalfInRadian = playerFOVInRadian / 2.0
+        playerCosFOVHalf = cos(playerFOVHalfInRadian)
+        playerSinFOVHalf = sin(playerFOVHalfInRadian)
+    }
+    init {
+        updateConstants()
+    }
 
     private val sessionCreatedWorld = player.world
     private val entityMap = HashMap<String, HoverUIEntity>()
@@ -70,21 +96,51 @@ class HoverUISession(
                 ?.first
         }
 
+        val eyeOrigin = player.eyeLocation
+        // 왼손 좌표계
+        val forward = eyeOrigin.direction
+        val right = VectorUtil.UP.crossProduct(forward)
+        val up = forward.getCrossProduct(right)
+
         for((_, entity) in entityMap){
             val isHovered = currentHoveredEntity == entity
-            if(player.world != entity.targetLocation.world) continue
-            val distance = player.eyeLocation.distance(entity.targetLocation)
+            val target = entity.targetLocation
+            if(player.world != target.world) continue
+
+            val targetRay = target.toVector() - eyeOrigin
+            val direction = targetRay.normalized
+            val distance = targetRay.length()
             val radius = if(isHovered) hoveredRadius else radius
-            // 플레이어 머리 위치 -> 실제 목표 위치
-            val direction = (entity.targetLocation - player.eyeLocation).toVector().normalized
-            val location = if(distance < radius) {
-                entity.targetLocation
-            }else {
-                direction.normalized
-                    .multiply(radius)
-                    .toLocation(player.world)
-                    .add(player.eyeLocation)
+            val angleByDot = forward.dot(direction)
+            val location: Location
+            // 시야각 바깥인 경우
+            if(angleByDot < playerCosFOVHalf) {
+                // 시야각 바깥인데, 범위 내인 경우
+                val length = min(distance, radius)
+                val fPrimeLength = playerCosFOVHalf * length
+                val fPrime = forward * fPrimeLength
+                val u = targetRay - fPrime
+                val uPrime = Vector(right.dot(u), up.dot(u), 0.0)
+                // distance, radius 중 최솟값 반지름만큼 곱함
+                uPrime.normalize().multiply(playerSinFOVHalf * length)
+                entity.relativeDirection = uPrime
+                val result = up * uPrime.y + right * uPrime.x
+                location = eyeOrigin + (fPrime.add(result))
             }
+            // 시야각 안인 경우
+            else{
+                entity.relativeDirection = null
+                // 거리 내면 그대로, 거리 밖이면 최대거리로 보정
+                location = if(distance < radius) {
+                    target
+                }else {
+                    direction.normalized
+                        .multiply(radius)
+                        .toLocation(player.world)
+                        .add(eyeOrigin)
+                }
+            }
+
 //            player.spawnParticle(Particle.CRIT, location, 1)
             // 머리 방향 설정
             location.direction = -direction
