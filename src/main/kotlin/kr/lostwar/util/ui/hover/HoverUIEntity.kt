@@ -139,7 +139,7 @@ class HoverUIEntity(
         } ?: createEntity(location).also { entity = it }
 
         val oldLocation = entity.location
-        if(!player.isInsideVehicle && abs(oldLocation.y - newLocation.y) <= 2) { //2 이하면 느린 lerp (위아래 흔들림 제어)
+        if(!player.isInsideVehicle && relativeDirection == null && abs(oldLocation.y - newLocation.y) <= 2) { //2 이하면 느린 lerp (위아래 흔들림 제어)
             entity.location = Location(
                 newLocation.world,
                 newLocation.x,

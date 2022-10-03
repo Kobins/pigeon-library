@@ -5,6 +5,7 @@ import kr.lostwar.util.scoreboard.filler.PlayerScoreboardFiller
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import java.util.*
 
@@ -24,7 +25,7 @@ class PlayerScoreboardController private constructor(
 
     val scoreboard by lazy { Bukkit.getScoreboardManager().newScoreboard }
     val objective by lazy {
-        scoreboard.registerNewObjective(" ", "dummy", Component.empty()).apply {
+        scoreboard.registerNewObjective(" ", Criteria.DUMMY, Component.empty()).apply {
             displaySlot = DisplaySlot.SIDEBAR
         }
     }

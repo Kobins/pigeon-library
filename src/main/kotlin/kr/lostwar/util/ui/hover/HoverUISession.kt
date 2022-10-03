@@ -9,6 +9,7 @@ import kr.lostwar.util.math.VectorUtil.times
 import kr.lostwar.util.math.VectorUtil.unaryMinus
 import kr.lostwar.util.math.toRadians
 import kr.lostwar.util.ui.hover.HoverUI.Companion.hoverUI
+import org.bukkit.FluidCollisionMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -17,7 +18,6 @@ import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
 import kotlin.math.cos
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
@@ -30,7 +30,7 @@ class HoverUISession(
     var detectRange: Double = 1.5
     var useMouseHover = true
     var onTick: (HoverUIEntity) -> Unit = {}
-    var playerFOVInRadian = 70.0.toRadians()
+    var playerFOVInRadian = 50.0.toRadians()
         set(value) {
             field = value
             updateConstants()
@@ -81,7 +81,7 @@ class HoverUISession(
         if(useMouseHover) {
             val playerDirection = player.eyeLocation.direction
             val raycasted = playerDirection.normalize().multiply(radius)
-            val detectRangeSqaured = detectRange * detectRange
+            val detectRangeSquared = detectRange * detectRange
             currentHoveredEntity = entityMap
                 .map {
                     it.value to raycasted.distanceSquared(
@@ -91,7 +91,7 @@ class HoverUISession(
                             .multiply(radius)
                     )
                 }
-                .filter { it.second <= detectRangeSqaured }
+                .filter { it.second <= detectRangeSquared }
                 .minByOrNull { it.second }
                 ?.first
         }
@@ -113,23 +113,26 @@ class HoverUISession(
             val radius = if(isHovered) hoveredRadius else radius
             val angleByDot = forward.dot(direction)
             val location: Location
+            val hoverDirection: Vector
+            val length = min(distance, radius)
             // 시야각 바깥인 경우
             if(angleByDot < playerCosFOVHalf) {
-                // 시야각 바깥인데, 범위 내인 경우
-                val length = min(distance, radius)
                 val fPrimeLength = playerCosFOVHalf * length
                 val fPrime = forward * fPrimeLength
                 val u = targetRay - fPrime
-                val uPrime = Vector(right.dot(u), up.dot(u), 0.0)
+                val uPrime = Vector(right.dot(u), up.dot(u), 0.0).normalize()
+                entity.relativeDirection = uPrime.clone()
                 // distance, radius 중 최솟값 반지름만큼 곱함
-                uPrime.normalize().multiply(playerSinFOVHalf * length)
-                entity.relativeDirection = uPrime
+                uPrime.multiply(playerSinFOVHalf * length)
                 val result = up * uPrime.y + right * uPrime.x
-                location = eyeOrigin + (fPrime.add(result))
+                val finalDirection = fPrime.add(result)
+                location = eyeOrigin + finalDirection
+                hoverDirection = finalDirection.normalized
             }
             // 시야각 안인 경우
             else{
                 entity.relativeDirection = null
+                hoverDirection = direction
                 // 거리 내면 그대로, 거리 밖이면 최대거리로 보정
                 location = if(distance < radius) {
                     target
@@ -140,11 +143,17 @@ class HoverUISession(
                         .add(eyeOrigin)
                 }
             }
-
 //            player.spawnParticle(Particle.CRIT, location, 1)
+            val finalLocation: Location
+            val result = player.world.rayTraceBlocks(eyeOrigin, hoverDirection, length, FluidCollisionMode.ALWAYS, true)
+            if(result == null) {
+                finalLocation = location
+            }else{
+                finalLocation = result.hitPosition.toLocation(player.world)
+            }
             // 머리 방향 설정
-            location.direction = -direction
-            entity.location = location
+            finalLocation.direction = -direction
+            entity.location = finalLocation
             entity.tick()
             onTick(entity)
         }

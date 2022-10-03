@@ -37,6 +37,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
             }
             isInvisible = true
             isNoGravity = true
+            isMarker = true
         }
     }
     private val serverLocation: Location
