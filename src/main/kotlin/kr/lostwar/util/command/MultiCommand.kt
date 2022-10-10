@@ -32,6 +32,7 @@ abstract class MultiCommand(
             sender.errorMessage("invalid command &e$subCommandString")
             return
         }
+        if(!subCommand.isExecutable(sender)) return
         val subCommandExecuteData = SubCommandExecuteData(sender, this, label, args)
         with(subCommand) { subCommandExecuteData.execute() }
         return
