@@ -125,7 +125,7 @@ object BoatNMSUtil {
         return maxY + 1.0
     }
 
-    fun Entity.isUnderWater(): BoatState? {
+    fun Entity.isUnderWaterAndGetBoatState(): BoatState? {
         val nmsEntity = nmsEntity
         val aabb = nmsEntity.boundingBox
         val upper = aabb.maxY + 0.001
