@@ -6,7 +6,7 @@ abstract class SubCommand(
     val name: String,
 ){
     open fun isExecutable(sender: CommandSender): Boolean = true
-    open fun isSuggestible(sender: CommandSender): Boolean = true
+    open fun isSuggestible(sender: CommandSender): Boolean = isExecutable(sender)
     abstract fun SubCommandExecuteData.execute()
     open fun SubCommandExecuteData.complete(): List<String>? = emptyList()
 
