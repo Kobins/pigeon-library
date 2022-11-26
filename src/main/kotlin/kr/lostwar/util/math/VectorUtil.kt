@@ -118,6 +118,7 @@ object VectorUtil {
     operator fun Location.plus(other: Location) = Location(world, x + other.x, y + other.y, z + other.z)
     operator fun Vector.plus(other: Vector) = Vector(x + other.x, y + other.y, z + other.z)
     operator fun Vector.plus(other: Location) = Vector(x + other.x, y + other.y, z + other.z)
+
     operator fun Location.minus(other: Vector) = Location(world, x - other.x, y - other.y, z - other.z)
     operator fun Location.minus(other: Location) = Location(world, x - other.x, y - other.y, z - other.z)
     operator fun Vector.minus(other: Vector) = Vector(x - other.x, y - other.y, z - other.z)
@@ -128,6 +129,10 @@ object VectorUtil {
     operator fun Vector.unaryMinus() = times(-1.0)
 
     fun Vector.dot(location: Location) = x * location.x + y * location.y + z * location.z
+
+    fun Vector.clone(x: Double = this.x, y: Double = this.y, z: Double = this.z): Vector {
+        return Vector(x, y, z)
+    }
 
     fun Location.modifiedX(x: Double) = Location(world, x, y, z, yaw, pitch)
     fun Location.modifiedY(y: Double) = Location(world, x, y, z, yaw, pitch)
@@ -204,4 +209,41 @@ object VectorUtil {
         yaw: Float = this.yaw,
         pitch: Float = this.pitch,
     ) = Location(world, x, y, z, yaw, pitch)
+
+    fun Vector.set(value: Vector): Vector {
+        x = value.x
+        y = value.y
+        z = value.z
+        return this
+    }
+
+    fun Vector.set(x: Double = this.x, y: Double = this.y, z: Double = this.z): Vector {
+        this.x = x
+        this.y = y
+        this.z = z
+        return this
+    }
+    operator fun Vector.get(index: Int) = when(index) {
+        0 -> x
+        1 -> y
+        2 -> z
+        else -> error("invalid index call on vector(${index})")
+    }
+    operator fun Vector.set(index: Int, value: Double): Vector {
+        when(index) {
+            0 -> x = value
+            1 -> y = value
+            2 -> z = value
+            else -> {}
+        }
+        return this
+    }
+
+    fun Vector.length(newLength: Double): Vector {
+        val lengthSquared = lengthSquared()
+        // 영벡터는 방향이 없음
+        if(lengthSquared <= 0.0) return this
+        val invLength = 1.0 / sqrt(lengthSquared)
+        return multiply(newLength * invLength)
+    }
 }
