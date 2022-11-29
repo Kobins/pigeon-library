@@ -30,7 +30,7 @@
         <minecraft.version>1.19.2</minecraft.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <maven.compiler.useIncrementalCompilation>true</maven.compiler.useIncrementalCompilation>
-        <NEXUS-HOST>59.11.245.108:10012</NEXUS-HOST>
+        <NEXUS-HOST>rdp.marsys.kr:10012</NEXUS-HOST>
     </properties>
 
     <distributionManagement>
