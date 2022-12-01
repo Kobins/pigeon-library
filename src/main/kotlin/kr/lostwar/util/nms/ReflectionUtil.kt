@@ -1,5 +1,6 @@
 package kr.lostwar.util.nms
 
+import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
@@ -68,6 +69,24 @@ object ReflectionUtil {
         }
 
         return methodMap[clazz]!![methodName]!!
+    }
+
+    private val constructorMap = ConcurrentHashMap<Class<*>, Constructor<*>>()
+    fun unlockConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>) {
+        try {
+            val constructor = clazz.getConstructor(*parameterTypes)
+            constructor.isAccessible = true
+            constructorMap[clazz] = constructor
+        }catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+    fun getConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*> {
+        if(!constructorMap.containsKey(clazz)) {
+            unlockConstructor(clazz, *parameterTypes)
+        }
+
+        return constructorMap[clazz]!!
     }
 
     fun getClass(name: String) {

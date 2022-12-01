@@ -1,15 +1,24 @@
 package kr.lostwar.util.nms
 
+import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap
 import kr.lostwar.util.math.VectorUtil.toYawPitchDegree
 import kr.lostwar.util.nms.NMSUtil.asNMSCopy
 import kr.lostwar.util.nms.NMSUtil.nmsEntity
 import kr.lostwar.util.nms.NMSUtil.nmsPlayer
 import kr.lostwar.util.nms.NMSUtil.nmsSlot
+import net.minecraft.core.BlockPos
+import net.minecraft.core.SectionPos
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import net.minecraft.world.level.block.state.BlockState
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -17,6 +26,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
+import kotlin.collections.HashMap
 
 object PacketUtil {
 
@@ -77,6 +87,34 @@ object PacketUtil {
     }
     fun Player.sendEquipmentSelf(itemStack: ItemStack, slot: EquipmentSlot)
         = sendEquipment(itemStack, slot, Collections.singletonList(this))
+
+    private val sectionBlocksUpdatePacketConstructor = ReflectionUtil.getConstructor(ClientboundSectionBlocksUpdatePacket::class.java,
+        SectionPos::class.java,
+        Short2ObjectMap::class.java,
+        Boolean::class.java,
+    )
+    fun Iterable<Player>.sendMultiBlockChange(blockChanges: Map<Location, BlockData>, suppressLightUpdates: Boolean = false) {
+        val sectionMap = HashMap<SectionPos, Short2ObjectMap<BlockState>>()
+        for((location, blockData) in blockChanges) {
+            val blockPos = BlockPos(location.x, location.y, location.z)
+            val sectionPos = SectionPos.of(blockPos)
+
+            val sectionData = sectionMap.getOrPut(sectionPos) { Short2ObjectArrayMap() }
+            sectionData[SectionPos.sectionRelativePos(blockPos)] = (blockData as CraftBlockData).state
+        }
+        val packets = buildList<ClientboundSectionBlocksUpdatePacket> {
+            for((sectionPos, blockData) in sectionMap) {
+                add(sectionBlocksUpdatePacketConstructor
+                    .newInstance(sectionPos, blockData, suppressLightUpdates) as ClientboundSectionBlocksUpdatePacket
+                )
+            }
+        }
+        for(player in this) {
+            for(packet in packets) {
+                player.sendPacket(packet)
+            }
+        }
+    }
 
 //var PacketContainer.bossBarAction: BossBarAction
 //    get() = getEnumModifier(BossBarAction::class.java, 1).read(0)
