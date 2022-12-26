@@ -130,7 +130,7 @@ object VectorUtil {
 
     fun Vector.dot(location: Location) = x * location.x + y * location.y + z * location.z
 
-    fun Vector.clone(x: Double = this.x, y: Double = this.y, z: Double = this.z): Vector {
+    fun Vector.cloned(x: Double = this.x, y: Double = this.y, z: Double = this.z): Vector {
         return Vector(x, y, z)
     }
 
