@@ -34,6 +34,7 @@ val Long.ticks: Duration; get() = (this * 50).milliseconds
 
 val Duration.inTicks: Long
     get() = inWholeMilliseconds / 50
+val Duration.inTicksInt: Int; get() = inTicksInt.toInt()
 
 val Duration.java: java.time.Duration
     get() = toJavaDuration()
