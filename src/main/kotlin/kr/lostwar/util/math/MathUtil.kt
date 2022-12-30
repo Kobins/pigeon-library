@@ -1,6 +1,16 @@
 package kr.lostwar.util.math
 
+import kotlin.math.abs
 import kotlin.random.Random
+
+const val smallNumber = 1.0e-8
+const val smallNumberInFloat = 1.0e-8f
+fun equalsInTolerance(a: Double, b: Double, tolerance: Double = smallNumber): Boolean {
+    return abs(a - b) <= tolerance
+}
+fun equalsInTolerance(a: Float, b: Float, tolerance: Float = smallNumberInFloat): Boolean {
+    return abs(a - b) <= tolerance
+}
 
 fun lerp(start: Double, end: Double, percentage: Double): Double{
     return start + (end - start) * percentage

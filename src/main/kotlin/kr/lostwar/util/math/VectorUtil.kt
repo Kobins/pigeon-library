@@ -19,8 +19,15 @@ object VectorUtil {
     val DOWN: Vector; get() = Vector(0, -1, 0)
     val LEFT: Vector; get() = Vector(-1, 0, 0)
     val RIGHT: Vector; get() = Vector(1, 0, 0)
-    val FORWARD: Vector; get() = Vector(0, 0, 1)
-    val BACK: Vector; get() = Vector(0, 0, -1)
+    // 오른손 좌표계이므로
+    val BACK: Vector; get() = Vector(0, 0, 1)
+    val FORWARD: Vector; get() = Vector(0, 0, -1)
+
+    val standardBasisVectors; get() = arrayOf(
+        RIGHT,
+        UP,
+        BACK,
+    )
 
     val Vector.yaw: Double
         get() {
