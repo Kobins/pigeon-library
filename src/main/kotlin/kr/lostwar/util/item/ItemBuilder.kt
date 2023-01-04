@@ -114,10 +114,10 @@ class ItemBuilder : ItemStack {
     }
 
     fun addItemFlagAll() = addItemFlag(*ItemFlag.values())
-    fun addItemFlag(vararg flags: ItemFlag) = apply {
+    fun addItemFlag(vararg flags: ItemFlag) = applyItemMeta {
         addItemFlags(*flags)
     }
-    fun removeItemFlag(vararg flags: ItemFlag) = apply {
+    fun removeItemFlag(vararg flags: ItemFlag) = applyItemMeta {
         removeItemFlags(*flags)
     }
 

@@ -91,7 +91,7 @@ class Quaternion {
         if(trace > 0.0) {
             root = sqrt(trace + 1.0)
             w = 0.5 * root
-            root *= 2.0
+            root = 0.5 / root
 
             // w 요소를 구하고 나머지 X,Y,Z를 계산
             r.set(
@@ -115,7 +115,7 @@ class Quaternion {
         root = sqrt(matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0)
 
         r[i] = 0.5 * root
-        root *= 2.0
+        root = 0.5 / root
 
         // 나머지 두 요소의 값 구하기
         r[j] = (matrix[i][j] + matrix[j][i]) * root
