@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.state.BlockState
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers
+import org.bukkit.craftbukkit.v1_18_R2.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -88,6 +88,8 @@ object PacketUtil {
     fun Player.sendEquipmentSelf(itemStack: ItemStack, slot: EquipmentSlot)
         = sendEquipment(itemStack, slot, Collections.singletonList(this))
 
+    // 1.19 Paper에만 존재하는 생성자
+    /*
     private val sectionBlocksUpdatePacketConstructor = ReflectionUtil.getConstructor(ClientboundSectionBlocksUpdatePacket::class.java,
         SectionPos::class.java,
         Short2ObjectMap::class.java,
@@ -115,6 +117,8 @@ object PacketUtil {
             }
         }
     }
+
+     */
 
 //var PacketContainer.bossBarAction: BossBarAction
 //    get() = getEnumModifier(BossBarAction::class.java, 1).read(0)

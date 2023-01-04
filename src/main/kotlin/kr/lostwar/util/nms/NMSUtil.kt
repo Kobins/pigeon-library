@@ -22,16 +22,16 @@ import net.minecraft.world.phys.Vec3
 import org.bukkit.FluidCollisionMode
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.craftbukkit.v1_19_R1.CraftFluidCollisionMode
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftRayTraceResult
+import org.bukkit.craftbukkit.v1_18_R2.CraftFluidCollisionMode
+import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftLivingEntity
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_18_R2.event.CraftEventFactory
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftRayTraceResult
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.entity.LivingEntity
@@ -60,7 +60,7 @@ object NMSUtil {
         val item = inventory.itemInMainHand
 
         if (block.isPreferredTool(item)) {
-            return nmsBlock.getExpDrop(nmsData, level, pos, item.asNMSCopy(), true)
+            return nmsBlock.getExpDrop(nmsData, level, pos, item.asNMSCopy())
         }
         return 0
 
@@ -80,10 +80,11 @@ object NMSUtil {
     val EquipmentSlot.nmsSlot; get() = equipmentSlotBukkitToNMS[this]!!
 
     // 1.19.1 obfucscation https://piston-data.mojang.com/v1/objects/3565648cdd47ae15738fb804a95a659137d7cfd3/server.txt
-
     private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba")
     private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ")
-    private val entityHardCollidesField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "hardCollides")
+
+    // hardCollides는 Paper에만 존재함
+//    private val entityHardCollidesField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "hardCollides")
 
     fun org.bukkit.entity.Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
         val nmsEntity = nmsEntity
@@ -111,6 +112,7 @@ object NMSUtil {
         nmsEntity.noPhysics = noPhysics
     }
 
+    /*
     fun org.bukkit.entity.Entity.setHardCollides(hardCollides: Boolean) {
         val nmsEntity = nmsEntity
         entityHardCollidesField.setBoolean(nmsEntity, hardCollides)
@@ -119,6 +121,8 @@ object NMSUtil {
         val nmsEntity = nmsEntity
         return entityHardCollidesField.getBoolean(nmsEntity)
     }
+
+     */
 
     fun org.bukkit.entity.Entity.setIsOnGround(onGround: Boolean) {
         val nmsEntity = nmsEntity
