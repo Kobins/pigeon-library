@@ -3,7 +3,5 @@ main: kr.lostwar.PigeonLibraryPlugin
 version: 1.0
 api-version: 1.18
 author: Kobins
-depend:
-  - ProtocolLib
 softdepend:
   - kotlin-plugin

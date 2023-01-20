@@ -1,9 +1,5 @@
 package kr.lostwar.util.ui.hover
 
-import com.comphenix.protocol.PacketType
-import com.comphenix.protocol.events.PacketAdapter
-import com.comphenix.protocol.events.PacketEvent
-import kr.lostwar.PigeonLibraryPlugin
 import kr.lostwar.util.ui.hover.HoverUI.Companion.hoverUI
 import kr.lostwar.util.ui.text.console
 import org.bukkit.Bukkit
@@ -15,15 +11,18 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 
-object HoverUIListener : PacketAdapter(
-    PigeonLibraryPlugin.instance,
-    PacketType.Play.Server.UNLOAD_CHUNK
-), Listener {
+object HoverUIListener :
+//    PacketAdapter(
+//        PigeonLibraryPlugin.instance,
+//        PacketType.Play.Server.UNLOAD_CHUNK
+//    ),
+    Listener
+{
 
-    override fun onPacketReceiving(event: PacketEvent) {
-    }
+//    override fun onPacketReceiving(event: PacketEvent) {
+//    }
 
-    override fun onPacketSending(event: PacketEvent) {
+//    override fun onPacketSending(event: PacketEvent) {
 //        if(event.isPlayerTemporary) return
 //        val player = event.player
 //        val packet = event.packet
@@ -33,7 +32,7 @@ object HoverUIListener : PacketAdapter(
 //        if(event.isCancelled){
 //            console("chunk unload cancelled by HoverUIListener($chunkX, $chunkZ)")
 //        }
-    }
+//    }
 
     @EventHandler
     fun ChunkUnloadEvent.onUnload(){

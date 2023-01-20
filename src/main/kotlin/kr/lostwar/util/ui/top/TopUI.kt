@@ -1,8 +1,5 @@
 package kr.lostwar.util.ui.top
 
-import com.comphenix.protocol.PacketType.Play
-import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.events.PacketContainer
 import kr.lostwar.PigeonLibraryPlugin
 import kr.lostwar.util.nms.PacketUtil.sendPacket
 import net.kyori.adventure.bossbar.BossBar
@@ -243,10 +240,10 @@ class TopUI(
         fun Player.clearBossBars(){
             //visible한 애들에 한해 모든 보스바 REMOVE 패킷 보내기
             bossbarMap.values.filter { it.isVisible }.forEach {
-                val packet = PacketContainer(Play.Server.BOSS)
-                packet.uuiDs.write(0, it.uniqueId)
-                packet.integers.write(0, 1)
-                ProtocolLibrary.getProtocolManager().sendServerPacket(this, packet)
+//                val packet = PacketContainer(Play.Server.BOSS)
+//                packet.uuiDs.write(0, it.uniqueId)
+//                packet.integers.write(0, 1)
+//                ProtocolLibrary.getProtocolManager().sendServerPacket(this, packet)
             }
         }
 
