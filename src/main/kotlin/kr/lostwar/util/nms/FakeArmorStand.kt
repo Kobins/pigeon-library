@@ -11,6 +11,7 @@ import kr.lostwar.util.nms.PacketUtil.sendPacket
 import kr.lostwar.util.ui.ComponentUtil.asMiniMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.minecraft.core.Rotations
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.entity.EquipmentSlot
@@ -162,7 +163,15 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
             return displayName?.let { MiniMessage.miniMessage().serialize(it) }
         }
         set(value) {
-            displayName = value?.asMiniMessage
+            if(value == null) {
+                displayName = null
+                return
+            }
+            if(value.contains('§')) {
+                displayName = LegacyComponentSerializer.legacySection().deserialize(value)
+            }else{
+                displayName = value.asMiniMessage
+            }
         }
 
     var displayName: Component? = Component.empty()
