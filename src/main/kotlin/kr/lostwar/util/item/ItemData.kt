@@ -53,13 +53,19 @@ data class ItemData(
     }
 
     fun equals(itemStack: ItemStack): Boolean{
+        // optimization: material first check
+        if(type != itemStack.type) return false
+        // meta == null => data == 0
+        if(!itemStack.hasItemMeta()) {
+            return data == 0
+        }
+        // then access meta
         val meta = itemStack.itemMeta
         val cmd = when{
             meta == null || !meta.hasCustomModelData() -> 0
             else -> meta.customModelData
         }
-        return itemStack.type == type
-                && cmd == data
+        return cmd == data
     }
 
     override fun toString(): String {
