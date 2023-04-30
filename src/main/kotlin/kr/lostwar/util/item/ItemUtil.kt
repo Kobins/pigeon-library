@@ -87,6 +87,28 @@ object ItemUtil {
             }
         }
     }
+    fun Inventory.itemCount(target: ItemData): Int {
+        return storageContents!!.filterNotNull().filter { target.equals(it) }.sumOf { it.amount }
+    }
+
+    fun Inventory.removeItem(itemData: ItemData, amount: Int) {
+        if (amount <= 0) return
+        var leftAmount = amount
+        for (slot in 0 until size) {
+            val item: ItemStack = getItem(slot) ?: continue
+            if (itemData.equals(item)) {
+                val newAmount = item.amount - leftAmount
+                if (newAmount > 0) {
+                    item.amount = newAmount
+                    break
+                } else {
+                    clear(slot)
+                    leftAmount = -newAmount
+                    if (leftAmount <= 0) break
+                }
+            }
+        }
+    }
 
 
 }
