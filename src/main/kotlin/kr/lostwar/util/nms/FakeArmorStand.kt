@@ -42,7 +42,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
         }
     }
     private val serverLocation: Location
-        get() = Location(nmsArmorStand.level.minecraftWorld.world,
+        get() = Location(nmsArmorStand.level().minecraftWorld.world,
             nmsArmorStand.x,
             nmsArmorStand.y,
             nmsArmorStand.z,
@@ -86,7 +86,7 @@ class FakeArmorStand(location: Location, private val headRotateByPose: Boolean =
     }
 
     private fun updateEntity(player: Player) {
-        val dataPacket = ClientboundSetEntityDataPacket(nmsArmorStand.id, nmsArmorStand.entityData, true)
+        val dataPacket = ClientboundSetEntityDataPacket(nmsArmorStand.id, nmsArmorStand.entityData.nonDefaultValues)
         player.sendPacket(dataPacket)
     }
 

@@ -34,7 +34,7 @@ object BoatNMSUtil {
         var frictionSum = 0.0f
         var frictionCount = 0
         val v = MutableBlockPos()
-        val level = nmsEntity.level
+        val level = nmsEntity.level()
 
         for(x in minX until maxX) {
             for(z in minZ until maxZ) {
@@ -44,7 +44,7 @@ object BoatNMSUtil {
                     for(y in minY until maxY) {
                         if(flag <= 0 || y != minY && y != maxY - 1) {
                             v.set(x, y, z)
-                            val b = nmsEntity.level.getBlockState(v)
+                            val b = nmsEntity.level().getBlockState(v)
 
                             if(Shapes.joinIsNotEmpty(b.getCollisionShape(level, v).move(x.toDouble(), y.toDouble(), z.toDouble()), shape, BooleanOp.AND)) {
                                 frictionSum += b.block.friction
@@ -70,7 +70,7 @@ object BoatNMSUtil {
 
         var maxWaterLevel = -1.7976931348623157E308
         val v = MutableBlockPos()
-        val level = nmsEntity.level
+        val level = nmsEntity.level()
 
         for(x in minX until maxX) {
             for(z in minZ until maxZ) {
@@ -99,7 +99,7 @@ object BoatNMSUtil {
         val maxZ = Mth.ceil(aabb.maxZ)
 
         val v = MutableBlockPos()
-        val level = nmsEntity.level
+        val level = nmsEntity.level()
 
         yLoop@
         for(y in minY until maxY) {
@@ -138,7 +138,7 @@ object BoatNMSUtil {
 
         var flag = false
         val v = MutableBlockPos()
-        val level = nmsEntity.level
+        val level = nmsEntity.level()
         var fluid: FluidState
         for(x in minX until maxX) {
             for(z in minZ until maxZ) {

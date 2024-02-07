@@ -14,12 +14,13 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import net.minecraft.world.entity.RelativeMovement
 import net.minecraft.world.level.block.state.BlockState
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -32,22 +33,22 @@ object PacketUtil {
 
 
     private val relativeAll = setOf(
-        ClientboundPlayerPositionPacket.RelativeArgument.X,
-        ClientboundPlayerPositionPacket.RelativeArgument.Y,
-        ClientboundPlayerPositionPacket.RelativeArgument.Z,
-        ClientboundPlayerPositionPacket.RelativeArgument.X_ROT,
-        ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT,
+        RelativeMovement.X,
+        RelativeMovement.Y,
+        RelativeMovement.Z,
+        RelativeMovement.X_ROT,
+        RelativeMovement.Y_ROT,
     )
     private val relativeMove = setOf(
-        ClientboundPlayerPositionPacket.RelativeArgument.X,
-        ClientboundPlayerPositionPacket.RelativeArgument.Y,
-        ClientboundPlayerPositionPacket.RelativeArgument.Z,
+        RelativeMovement.X,
+        RelativeMovement.Y,
+        RelativeMovement.Z,
     )
 
     fun Player.sendPacket(packet: Packet<*>) = nmsPlayer.connection.send(packet)
 
     fun Player.rotateCamera(yaw: Float, pitch: Float){
-        val packet = ClientboundPlayerPositionPacket(0.0, 0.0, 0.0, yaw, pitch, relativeAll, 0, false)
+        val packet = ClientboundPlayerPositionPacket(0.0, 0.0, 0.0, yaw, pitch, relativeAll, 0)
         sendPacket(packet)
     }
     fun Player.setEyeDirection(direction: Vector){
@@ -58,7 +59,7 @@ object PacketUtil {
         setEyeDirection(yaw, pitch)
     }
     fun Player.setEyeDirection(yaw: Float, pitch: Float){
-        val packet = ClientboundPlayerPositionPacket(0.0, 0.0, 0.0, yaw, pitch, relativeMove, 0, false)
+        val packet = ClientboundPlayerPositionPacket(0.0, 0.0, 0.0, yaw, pitch, relativeMove, 0)
         sendPacket(packet)
     }
 
@@ -96,7 +97,7 @@ object PacketUtil {
     fun Iterable<Player>.sendMultiBlockChange(blockChanges: Map<Location, BlockData>, suppressLightUpdates: Boolean = false) {
         val sectionMap = HashMap<SectionPos, Short2ObjectMap<BlockState>>()
         for((location, blockData) in blockChanges) {
-            val blockPos = BlockPos(location.x, location.y, location.z)
+            val blockPos = BlockPos(location.x.toInt(), location.y.toInt(), location.z.toInt())
             val sectionPos = SectionPos.of(blockPos)
 
             val sectionData = sectionMap.getOrPut(sectionPos) { Short2ObjectArrayMap() }

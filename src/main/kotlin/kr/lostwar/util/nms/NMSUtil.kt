@@ -8,12 +8,15 @@ import kr.lostwar.util.ui.ComponentUtil.toJSONString
 import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.Holder
+import net.minecraft.core.Vec3i
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
 import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.EntityDimensions
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.block.entity.BlockEntityType
@@ -22,16 +25,16 @@ import net.minecraft.world.phys.Vec3
 import org.bukkit.FluidCollisionMode
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.craftbukkit.v1_19_R1.CraftFluidCollisionMode
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftRayTraceResult
+import org.bukkit.craftbukkit.v1_20_R3.CraftFluidCollisionMode
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_20_R3.event.CraftEventFactory
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftRayTraceResult
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.entity.LivingEntity
@@ -79,14 +82,15 @@ object NMSUtil {
     )
     val EquipmentSlot.nmsSlot; get() = equipmentSlotBukkitToNMS[this]!!
 
-    // 1.19.1 obfucscation https://piston-data.mojang.com/v1/objects/3565648cdd47ae15738fb804a95a659137d7cfd3/server.txt
+    // 1.20.4 obfucscation https://piston-data.mojang.com/v1/objects/c1cafe916dd8b58ed1fe0564fc8f786885224e62/server.txt
 
-    private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "ba")
-    private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "aZ")
+    private val entityEyeHeightField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "bi")
+    private val entityDimensionsField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "bh")
     private val entityHardCollidesField = ReflectionUtil.getField(net.minecraft.world.entity.Entity::class.java, "hardCollides")
 
     fun org.bukkit.entity.Entity.setEntitySize(width: Float, height: Float, eye: Float? = null) {
         val nmsEntity = nmsEntity
+        nmsEntity.eyeHeight
         // 1.19
         if(eye != null)
             entityEyeHeightField.setFloat(nmsEntity, eye)
@@ -122,7 +126,7 @@ object NMSUtil {
 
     fun org.bukkit.entity.Entity.setIsOnGround(onGround: Boolean) {
         val nmsEntity = nmsEntity
-        nmsEntity.isOnGround = onGround
+        nmsEntity.onGround = onGround
     }
 
     fun org.bukkit.entity.Entity.setImpulse() {
@@ -132,7 +136,7 @@ object NMSUtil {
 
     fun org.bukkit.entity.Entity.setMaxUpStep(maxUpStep: Float) {
         val nmsEntity = nmsEntity
-        nmsEntity.maxUpStep = maxUpStep
+        nmsEntity.setMaxUpStep(maxUpStep)
     }
 
     fun org.bukkit.entity.Entity.hasVerticalCollision(): Boolean {
@@ -154,33 +158,38 @@ object NMSUtil {
         nmsEntity.travel(Vec3(movementInput.x, movementInput.y, movementInput.z))
     }
 
+    /*
     private fun DamageCause.toNMS() = when(this) {
-        DamageCause.CUSTOM -> DamageSource.GENERIC
-        DamageCause.FIRE -> DamageSource.IN_FIRE
-        DamageCause.FIRE_TICK -> DamageSource.ON_FIRE
-        DamageCause.STARVATION -> DamageSource.STARVE
-        DamageCause.WITHER -> DamageSource.WITHER
-        DamageCause.DROWNING -> DamageSource.DROWN
+        DamageCause.CUSTOM -> DamageTypes.GENERIC
+        DamageCause.FIRE -> DamageTypes.IN_FIRE
+        DamageCause.FIRE_TICK -> DamageTypes.ON_FIRE
+        DamageCause.STARVATION -> DamageTypes.STARVE
+        DamageCause.WITHER -> DamageTypes.WITHER
+        DamageCause.DROWNING -> DamageTypes.DROWN
         DamageCause.MELTING -> CraftEventFactory.MELTING
         DamageCause.POISON -> CraftEventFactory.POISON
-        DamageCause.MAGIC -> DamageSource.MAGIC
-        DamageCause.FALL -> DamageSource.FALL
-        DamageCause.FLY_INTO_WALL -> DamageSource.FLY_INTO_WALL
-        DamageCause.CRAMMING -> DamageSource.CRAMMING
-        DamageCause.DRYOUT -> DamageSource.DRY_OUT
-        DamageCause.FREEZE -> DamageSource.FREEZE
-        DamageCause.FALLING_BLOCK -> DamageSource.FALLING_BLOCK // fixme
-        DamageCause.LIGHTNING -> DamageSource.LIGHTNING_BOLT // fixme?
-        DamageCause.DRAGON_BREATH -> DamageSource.DRAGON_BREATH
-        DamageCause.CONTACT -> DamageSource.CACTUS // fixme
-        DamageCause.HOT_FLOOR -> DamageSource.HOT_FLOOR
-        else -> error("failed to parse DamageCause.${this} to NMS DamageSource")
+        DamageCause.MAGIC -> DamageTypes.MAGIC
+        DamageCause.FALL -> DamageTypes.FALL
+        DamageCause.FLY_INTO_WALL -> DamageTypes.FLY_INTO_WALL
+        DamageCause.CRAMMING -> DamageTypes.CRAMMING
+        DamageCause.DRYOUT -> DamageTypes.DRY_OUT
+        DamageCause.FREEZE -> DamageTypes.FREEZE
+        DamageCause.FALLING_BLOCK -> DamageTypes.FALLING_BLOCK // fixme
+        DamageCause.LIGHTNING -> DamageTypes.LIGHTNING_BOLT // fixme?
+        DamageCause.DRAGON_BREATH -> DamageTypes.DRAGON_BREATH
+        DamageCause.CONTACT -> DamageTypes.CACTUS // fixme
+        DamageCause.HOT_FLOOR -> DamageTypes.HOT_FLOOR
+        else -> error("failed to parse DamageCause.${this} to NMS DamageTypes")
     }
     fun org.bukkit.entity.Entity.damage(amount: Double, cause: DamageCause): Boolean {
         val nmsEntity = nmsEntity
-        return nmsEntity.hurt(cause.toNMS(), amount.toFloat())
+        return nmsEntity.hurt(DamageSource(Holder.direct())cause.toNMS(), amount.toFloat())
     }
+     */
 
+    fun Vec3.toInt(): Vec3i {
+        return Vec3i(x.toInt(), y.toInt(), z.toInt())
+    }
     enum class RayTraceContinuation {
         STOP,
         PIERCE,
@@ -208,7 +217,7 @@ object NMSUtil {
             start, end,
             if(ignorePassableBlocks) ClipContext.Block.COLLIDER else ClipContext.Block.OUTLINE,
             CraftFluidCollisionMode.toNMS(fluidCollisionMode),
-            null
+            null as? net.minecraft.world.entity.Entity
         )
         traverseBlocks(start, end, context,
             onMove = { c, blockPos ->
@@ -231,7 +240,7 @@ object NMSUtil {
             onMiss = {
                 val d = it.from.subtract(it.to)
                 onHit(maxDistance, null)
-                BlockHitResult.miss(it.to, Direction.getNearest(d.x, d.y, d.z), BlockPos(it.to))
+                BlockHitResult.miss(it.to, Direction.getNearest(d.x, d.y, d.z), BlockPos(it.to.toInt()))
             }
         )
     }

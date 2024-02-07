@@ -1,7 +1,7 @@
 package kr.lostwar.util.nms
 
 import kr.lostwar.util.ui.text.consoleWarn
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftArmorStand
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftArmorStand
 import org.bukkit.entity.Entity
 import java.util.function.BiFunction
 
